@@ -1,0 +1,75 @@
+# Technique du milieu central : sécurité (précision), projection (passes progressives),
+# création (passes clés) et récupération (interceptions).
+
+[system]
+name = "technique_milieu_central"
+description = "Score technique d'un milieu central"
+
+[[inputs]]
+ref = "precision_passes_pct"
+[[inputs]]
+ref = "passes_progressives_p90"
+[[inputs]]
+ref = "passes_cles_p90"
+[[inputs]]
+ref = "interceptions_p90"
+
+[[outputs]]
+ref = "technique"
+
+[[rules]]
+id = "M1"
+text = "SI precision_passes_pct EST bonne ET passes_progressives_p90 EST eleve ALORS technique EST excellente"
+description = "Relanceur sûr et vertical"
+
+[[rules]]
+id = "M2"
+text = "SI precision_passes_pct EST bonne ET passes_progressives_p90 EST moyen ALORS technique EST bonne"
+
+[[rules]]
+id = "M3"
+text = "SI precision_passes_pct EST moyenne ET passes_progressives_p90 EST eleve ALORS technique EST bonne"
+
+[[rules]]
+id = "M4"
+text = "SI passes_cles_p90 EST eleve ET passes_progressives_p90 N'EST PAS faible ALORS technique EST excellente"
+description = "Créateur qui fait aussi avancer le jeu"
+
+[[rules]]
+id = "M5"
+text = "SI passes_cles_p90 EST eleve ALORS technique EST bonne"
+weight = 0.7
+
+[[rules]]
+id = "M6"
+text = "SI interceptions_p90 EST eleve ET precision_passes_pct N'EST PAS faible ALORS technique EST bonne"
+description = "Récupérateur fiable balle au pied"
+
+[[rules]]
+id = "M7"
+text = "SI precision_passes_pct EST moyenne ET passes_progressives_p90 EST moyen ALORS technique EST moyenne"
+
+[[rules]]
+id = "M8"
+text = "SI precision_passes_pct EST bonne ET passes_progressives_p90 EST faible ALORS technique EST moyenne"
+description = "Sûr mais peu de projection vers l'avant"
+
+[[rules]]
+id = "M9"
+text = "SI precision_passes_pct EST faible ET passes_progressives_p90 EST faible ALORS technique EST faible"
+
+[[rules]]
+id = "M10"
+text = "SI precision_passes_pct EST faible ALORS technique EST faible"
+weight = 0.7
+
+[[rules]]
+id = "M11"
+text = "SI passes_progressives_p90 EST faible ET passes_cles_p90 EST faible ET interceptions_p90 EST faible ALORS technique EST faible"
+weight = 0.8
+
+[[rules]]
+id = "M12"
+text = "SI precision_passes_pct EST moyenne ALORS technique EST moyenne"
+weight = 0.4
+description = "Règle de couverture"

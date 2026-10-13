@@ -1,0 +1,275 @@
+# Bibliothèque des variables linguistiques partagées par toutes les bases de connaissances.
+# Chaque variable = un univers de discours + des termes (prédicats flous) avec leur
+# fonction d'appartenance. Formes : ramp_down(a,b) = 1 avant a, 0 après b ;
+# ramp_up(a,b) = 0 avant a, 1 après b ; triangle(a,b,c) ; trapezoid(a,b,c,d).
+# Les seuils proviennent d'ordres de grandeur usuels des statistiques « par 90 minutes ».
+
+# ----------------------------------------------------------------- profil / contexte
+
+[[variables]]
+name = "age"
+description = "Âge du joueur"
+unit = "ans"
+universe = [16, 40]
+[variables.terms]
+jeune = { kind = "ramp_down", params = [22, 25] }
+prime = { kind = "triangle", params = [23, 28, 32] }
+veteran = { kind = "ramp_up", params = [30, 33] }
+
+[[variables]]
+name = "taille_cm"
+description = "Taille"
+unit = "cm"
+universe = [160, 205]
+[variables.terms]
+petit = { kind = "ramp_down", params = [172, 178] }
+moyen = { kind = "triangle", params = [174, 181, 188] }
+grand = { kind = "ramp_up", params = [184, 190] }
+
+[[variables]]
+name = "minutes_jouees"
+description = "Minutes jouées sur la saison de référence"
+unit = "min"
+universe = [0, 4000]
+[variables.terms]
+faible = { kind = "ramp_down", params = [800, 1500] }
+moyen = { kind = "triangle", params = [1200, 2000, 2800] }
+eleve = { kind = "ramp_up", params = [2400, 3000] }
+
+[[variables]]
+name = "blessures_jours"
+description = "Jours d'indisponibilité pour blessure sur la saison"
+unit = "jours"
+universe = [0, 200]
+[variables.terms]
+faible = { kind = "ramp_down", params = [15, 35] }
+moyen = { kind = "triangle", params = [25, 55, 90] }
+eleve = { kind = "ramp_up", params = [75, 110] }
+
+# ----------------------------------------------------------------- offensif
+
+[[variables]]
+name = "buts_p90"
+description = "Buts par 90 minutes"
+unit = "buts/90"
+universe = [0, 1.5]
+[variables.terms]
+faible = { kind = "ramp_down", params = [0.15, 0.35] }
+moyen = { kind = "triangle", params = [0.25, 0.45, 0.65] }
+eleve = { kind = "ramp_up", params = [0.55, 0.8] }
+
+[[variables]]
+name = "xg_p90"
+description = "Buts attendus (expected goals) par 90 minutes"
+unit = "xG/90"
+universe = [0, 1.5]
+[variables.terms]
+faible = { kind = "ramp_down", params = [0.15, 0.35] }
+moyen = { kind = "triangle", params = [0.25, 0.45, 0.65] }
+eleve = { kind = "ramp_up", params = [0.55, 0.8] }
+
+[[variables]]
+name = "passes_decisives_p90"
+description = "Passes décisives par 90 minutes"
+unit = "pd/90"
+universe = [0, 1.0]
+[variables.terms]
+faible = { kind = "ramp_down", params = [0.08, 0.18] }
+moyen = { kind = "triangle", params = [0.12, 0.25, 0.38] }
+eleve = { kind = "ramp_up", params = [0.3, 0.45] }
+
+[[variables]]
+name = "tirs_cadres_pct"
+description = "Part des tirs cadrés"
+unit = "%"
+universe = [0, 100]
+[variables.terms]
+faible = { kind = "ramp_down", params = [28, 38] }
+moyenne = { kind = "triangle", params = [33, 43, 53] }
+bonne = { kind = "ramp_up", params = [47, 58] }
+
+[[variables]]
+name = "passes_cles_p90"
+description = "Passes clés (menant à un tir) par 90 minutes"
+unit = "pc/90"
+universe = [0, 4]
+[variables.terms]
+faible = { kind = "ramp_down", params = [0.8, 1.5] }
+moyen = { kind = "triangle", params = [1.2, 2.0, 2.8] }
+eleve = { kind = "ramp_up", params = [2.4, 3.2] }
+
+[[variables]]
+name = "dribbles_p90"
+description = "Dribbles tentés par 90 minutes"
+unit = "dr/90"
+universe = [0, 8]
+[variables.terms]
+faible = { kind = "ramp_down", params = [1.0, 2.0] }
+moyen = { kind = "triangle", params = [1.5, 3.0, 4.5] }
+eleve = { kind = "ramp_up", params = [4.0, 5.5] }
+
+[[variables]]
+name = "dribbles_reussis_pct"
+description = "Taux de réussite des dribbles"
+unit = "%"
+universe = [0, 100]
+[variables.terms]
+faible = { kind = "ramp_down", params = [40, 50] }
+moyen = { kind = "triangle", params = [45, 55, 65] }
+bon = { kind = "ramp_up", params = [60, 70] }
+
+# ----------------------------------------------------------------- construction
+
+[[variables]]
+name = "precision_passes_pct"
+description = "Taux de passes réussies"
+unit = "%"
+universe = [50, 100]
+[variables.terms]
+faible = { kind = "ramp_down", params = [72, 78] }
+moyenne = { kind = "triangle", params = [75, 82, 88] }
+bonne = { kind = "ramp_up", params = [85, 90] }
+
+[[variables]]
+name = "passes_progressives_p90"
+description = "Passes progressives (vers l'avant, > 10 m) par 90 minutes"
+unit = "pp/90"
+universe = [0, 12]
+[variables.terms]
+faible = { kind = "ramp_down", params = [2.5, 4.5] }
+moyen = { kind = "triangle", params = [3.5, 5.5, 7.5] }
+eleve = { kind = "ramp_up", params = [6.5, 8.5] }
+
+# ----------------------------------------------------------------- défensif
+
+[[variables]]
+name = "tacles_p90"
+description = "Tacles par 90 minutes"
+unit = "t/90"
+universe = [0, 6]
+[variables.terms]
+faible = { kind = "ramp_down", params = [1.0, 1.8] }
+moyen = { kind = "triangle", params = [1.4, 2.4, 3.4] }
+eleve = { kind = "ramp_up", params = [3.0, 3.8] }
+
+[[variables]]
+name = "interceptions_p90"
+description = "Interceptions par 90 minutes"
+unit = "int/90"
+universe = [0, 5]
+[variables.terms]
+faible = { kind = "ramp_down", params = [0.8, 1.4] }
+moyen = { kind = "triangle", params = [1.1, 1.8, 2.6] }
+eleve = { kind = "ramp_up", params = [2.2, 3.0] }
+
+[[variables]]
+name = "duels_aeriens_pct"
+description = "Taux de duels aériens gagnés"
+unit = "%"
+universe = [0, 100]
+[variables.terms]
+faible = { kind = "ramp_down", params = [42, 50] }
+moyen = { kind = "triangle", params = [46, 55, 64] }
+eleve = { kind = "ramp_up", params = [60, 68] }
+
+# ----------------------------------------------------------------- physique
+
+[[variables]]
+name = "vitesse_max_kmh"
+description = "Vitesse de pointe"
+unit = "km/h"
+universe = [25, 38]
+[variables.terms]
+lente = { kind = "ramp_down", params = [30, 32] }
+moyenne = { kind = "triangle", params = [31, 33, 35] }
+rapide = { kind = "ramp_up", params = [34, 35.5] }
+
+[[variables]]
+name = "distance_km_p90"
+description = "Distance parcourue par 90 minutes"
+unit = "km/90"
+universe = [7, 14]
+[variables.terms]
+faible = { kind = "ramp_down", params = [9.5, 10.3] }
+moyenne = { kind = "triangle", params = [10.0, 10.8, 11.6] }
+elevee = { kind = "ramp_up", params = [11.3, 12.0] }
+
+# ----------------------------------------------------------------- gardien
+
+[[variables]]
+name = "arrets_pct"
+description = "Taux d'arrêts"
+unit = "%"
+universe = [50, 90]
+[variables.terms]
+faible = { kind = "ramp_down", params = [64, 69] }
+moyen = { kind = "triangle", params = [66, 71, 76] }
+eleve = { kind = "ramp_up", params = [74, 78] }
+
+[[variables]]
+name = "buts_encaisses_p90"
+description = "Buts encaissés par 90 minutes"
+unit = "buts/90"
+universe = [0, 3]
+[variables.terms]
+faible = { kind = "ramp_down", params = [0.8, 1.1] }
+moyen = { kind = "triangle", params = [0.9, 1.25, 1.6] }
+eleve = { kind = "ramp_up", params = [1.4, 1.8] }
+
+[[variables]]
+name = "sorties_aeriennes_p90"
+description = "Sorties aériennes par 90 minutes"
+unit = "sorties/90"
+universe = [0, 3]
+[variables.terms]
+faible = { kind = "ramp_down", params = [0.5, 0.9] }
+moyen = { kind = "triangle", params = [0.7, 1.2, 1.7] }
+eleve = { kind = "ramp_up", params = [1.5, 2.0] }
+
+# ----------------------------------------------------------------- scores intermédiaires et final
+# Même échelle [0, 100] et mêmes termes pour tous les scores, ce qui rend les étapes
+# composables : la sortie d'une étape est directement une entrée de la suivante.
+
+[[variables]]
+name = "technique"
+description = "Score technique spécifique au poste"
+unit = "/100"
+universe = [0, 100]
+[variables.terms]
+faible = { kind = "trapezoid", params = [0, 0, 25, 45] }
+moyenne = { kind = "triangle", params = [30, 50, 70] }
+bonne = { kind = "triangle", params = [55, 70, 85] }
+excellente = { kind = "trapezoid", params = [72, 88, 100, 100] }
+
+[[variables]]
+name = "physique"
+description = "Score physique"
+unit = "/100"
+universe = [0, 100]
+[variables.terms]
+faible = { kind = "trapezoid", params = [0, 0, 25, 45] }
+moyenne = { kind = "triangle", params = [30, 50, 70] }
+bonne = { kind = "triangle", params = [55, 70, 85] }
+excellente = { kind = "trapezoid", params = [72, 88, 100, 100] }
+
+[[variables]]
+name = "profil"
+description = "Score de profil (âge, temps de jeu, fiabilité physique)"
+unit = "/100"
+universe = [0, 100]
+[variables.terms]
+faible = { kind = "trapezoid", params = [0, 0, 25, 45] }
+moyenne = { kind = "triangle", params = [30, 50, 70] }
+bonne = { kind = "triangle", params = [55, 70, 85] }
+excellente = { kind = "trapezoid", params = [72, 88, 100, 100] }
+
+[[variables]]
+name = "aptitude"
+description = "Aptitude globale au poste"
+unit = "/100"
+universe = [0, 100]
+[variables.terms]
+faible = { kind = "trapezoid", params = [0, 0, 25, 45] }
+moyenne = { kind = "triangle", params = [30, 50, 70] }
+bonne = { kind = "triangle", params = [55, 70, 85] }
+excellente = { kind = "trapezoid", params = [72, 88, 100, 100] }

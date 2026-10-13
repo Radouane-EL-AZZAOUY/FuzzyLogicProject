@@ -1,0 +1,120 @@
+# Contrôleur flou d'irrigation : durée d'arrosage d'une parcelle à partir de
+# l'humidité du sol, de la température, de l'humidité de l'air et de la pluie prévue.
+
+[system]
+name = "irrigation"
+description = "Durée d'arrosage recommandée (minutes) pour une parcelle"
+
+[[inputs]]
+name = "humidite_sol"
+description = "Humidité volumique du sol"
+unit = "%"
+universe = [0, 100]
+[inputs.terms]
+sec = { kind = "ramp_down", params = [20, 35] }
+moyen = { kind = "triangle", params = [28, 45, 62] }
+humide = { kind = "ramp_up", params = [55, 70] }
+
+[[inputs]]
+name = "temperature"
+description = "Température de l'air"
+unit = "°C"
+universe = [-5, 50]
+[inputs.terms]
+froide = { kind = "ramp_down", params = [10, 18] }
+douce = { kind = "triangle", params = [14, 23, 32] }
+chaude = { kind = "ramp_up", params = [28, 36] }
+
+[[inputs]]
+name = "humidite_air"
+description = "Humidité relative de l'air"
+unit = "%"
+universe = [0, 100]
+[inputs.terms]
+faible = { kind = "ramp_down", params = [30, 45] }
+moyenne = { kind = "triangle", params = [38, 55, 72] }
+elevee = { kind = "ramp_up", params = [65, 80] }
+
+[[inputs]]
+name = "pluie_prevue_mm"
+description = "Précipitations prévues dans les 24 h"
+unit = "mm"
+universe = [0, 50]
+[inputs.terms]
+nulle = { kind = "ramp_down", params = [1, 4] }
+legere = { kind = "triangle", params = [2, 7, 13] }
+forte = { kind = "ramp_up", params = [10, 18] }
+
+[[outputs]]
+name = "duree_arrosage"
+description = "Durée d'arrosage recommandée"
+unit = "min"
+universe = [0, 60]
+[outputs.terms]
+nulle = { kind = "trapezoid", params = [0, 0, 2, 6] }
+courte = { kind = "triangle", params = [5, 15, 25] }
+moyenne = { kind = "triangle", params = [20, 32, 44] }
+longue = { kind = "trapezoid", params = [38, 50, 60, 60] }
+
+# --- pluie prévue : économiser l'eau -------------------------------------------
+[[rules]]
+id = "I1"
+text = "SI pluie_prevue_mm EST forte ALORS duree_arrosage EST nulle"
+description = "La pluie va arroser à notre place"
+
+[[rules]]
+id = "I2"
+text = "SI pluie_prevue_mm EST legere ET humidite_sol N'EST PAS sec ALORS duree_arrosage EST nulle"
+
+[[rules]]
+id = "I3"
+text = "SI pluie_prevue_mm EST legere ET humidite_sol EST sec ALORS duree_arrosage EST courte"
+
+# --- sol humide ------------------------------------------------------------------
+[[rules]]
+id = "I4"
+text = "SI humidite_sol EST humide ALORS duree_arrosage EST nulle"
+
+# --- sol moyen -------------------------------------------------------------------
+[[rules]]
+id = "I5"
+text = "SI humidite_sol EST moyen ET temperature EST chaude ET pluie_prevue_mm EST nulle ALORS duree_arrosage EST moyenne"
+
+[[rules]]
+id = "I6"
+text = "SI humidite_sol EST moyen ET temperature EST douce ET pluie_prevue_mm EST nulle ALORS duree_arrosage EST courte"
+
+[[rules]]
+id = "I7"
+text = "SI humidite_sol EST moyen ET temperature EST froide ALORS duree_arrosage EST nulle"
+weight = 0.8
+
+[[rules]]
+id = "I8"
+text = "SI humidite_sol EST moyen ET humidite_air EST faible ET temperature N'EST PAS froide ALORS duree_arrosage EST moyenne"
+weight = 0.7
+description = "Air sec : évapotranspiration élevée"
+
+# --- sol sec ----------------------------------------------------------------------
+[[rules]]
+id = "I9"
+text = "SI humidite_sol EST sec ET temperature EST chaude ET pluie_prevue_mm EST nulle ALORS duree_arrosage EST longue"
+
+[[rules]]
+id = "I10"
+text = "SI humidite_sol EST sec ET temperature EST douce ET pluie_prevue_mm EST nulle ALORS duree_arrosage EST moyenne"
+
+[[rules]]
+id = "I11"
+text = "SI humidite_sol EST sec ET temperature EST froide ET pluie_prevue_mm EST nulle ALORS duree_arrosage EST courte"
+
+[[rules]]
+id = "I12"
+text = "SI humidite_sol EST sec ET humidite_air EST faible ET pluie_prevue_mm EST nulle ALORS duree_arrosage EST longue"
+weight = 0.8
+
+[[rules]]
+id = "I13"
+text = "SI humidite_sol EST sec ET humidite_air EST elevee ET temperature N'EST PAS chaude ALORS duree_arrosage EST courte"
+weight = 0.6
+description = "Air humide : besoins réduits"

@@ -1,0 +1,85 @@
+# Technique du défenseur central : duels aériens, interceptions, tacles, relance.
+
+[system]
+name = "technique_defenseur_central"
+description = "Score technique d'un défenseur central"
+
+[[inputs]]
+ref = "duels_aeriens_pct"
+[[inputs]]
+ref = "interceptions_p90"
+[[inputs]]
+ref = "tacles_p90"
+[[inputs]]
+ref = "precision_passes_pct"
+
+[[outputs]]
+ref = "technique"
+
+[[rules]]
+id = "D1"
+text = "SI duels_aeriens_pct EST eleve ET interceptions_p90 EST eleve ALORS technique EST excellente"
+description = "Dominant dans les airs et en lecture du jeu"
+
+[[rules]]
+id = "D2"
+text = "SI duels_aeriens_pct EST eleve ET tacles_p90 EST eleve ALORS technique EST excellente"
+
+[[rules]]
+id = "D3"
+text = "SI tacles_p90 EST eleve ET interceptions_p90 EST eleve ET precision_passes_pct EST bonne ALORS technique EST excellente"
+description = "Défenseur complet, bon relanceur"
+
+[[rules]]
+id = "D4"
+text = "SI duels_aeriens_pct EST eleve ET interceptions_p90 EST moyen ALORS technique EST bonne"
+
+[[rules]]
+id = "D5"
+text = "SI duels_aeriens_pct EST moyen ET interceptions_p90 EST eleve ALORS technique EST bonne"
+
+[[rules]]
+id = "D6"
+text = "SI precision_passes_pct EST bonne ET duels_aeriens_pct N'EST PAS faible ALORS technique EST bonne"
+weight = 0.8
+description = "Qualité de relance valorisée"
+
+[[rules]]
+id = "D7"
+text = "SI duels_aeriens_pct EST moyen ET interceptions_p90 EST moyen ALORS technique EST moyenne"
+
+[[rules]]
+id = "D8"
+text = "SI tacles_p90 EST moyen ET interceptions_p90 EST moyen ALORS technique EST moyenne"
+weight = 0.7
+
+[[rules]]
+id = "D9"
+text = "SI duels_aeriens_pct EST faible ET interceptions_p90 EST faible ALORS technique EST faible"
+
+[[rules]]
+id = "D10"
+text = "SI duels_aeriens_pct EST faible ET tacles_p90 EST faible ALORS technique EST faible"
+
+[[rules]]
+id = "D11"
+text = "SI precision_passes_pct EST faible ET interceptions_p90 EST faible ALORS technique EST faible"
+weight = 0.8
+
+[[rules]]
+id = "D12"
+text = "SI duels_aeriens_pct EST faible ALORS technique EST moyenne"
+weight = 0.5
+description = "Règle de couverture : faiblesse aérienne compensable"
+
+[[rules]]
+id = "D13"
+text = "SI duels_aeriens_pct EST moyen ALORS technique EST moyenne"
+weight = 0.4
+description = "Règle de couverture"
+
+[[rules]]
+id = "D14"
+text = "SI duels_aeriens_pct EST eleve ALORS technique EST bonne"
+weight = 0.4
+description = "Règle de couverture : la domination aérienne vaut à elle seule un bon niveau"

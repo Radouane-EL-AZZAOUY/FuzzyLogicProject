@@ -1,0 +1,24 @@
+# Journal des modifications
+
+Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le versionnement
+[SemVer](https://semver.org/lang/fr/).
+
+## [0.1.0] — 2026-10-13
+
+### Ajouté
+
+- `fuzzyengine` : moteur d'inférence floue sans dépendance (fonctions d'appartenance, variables
+  linguistiques, formules, opérateurs de Zadeh / probabilistes / Łukasiewicz, modificateurs,
+  inférence de Mamdani, défuzzification centroïde / bissectrice / moyenne des maxima, pipelines,
+  langage de règles bilingue, chargeur TOML avec bibliothèque de variables, explications).
+- `fuzzyscout` : application de scouting (5 postes, 9 bases de connaissances, filtres nets,
+  classement et évaluation avec trace, dépôt CSV, CLI `fuzzyscout`, API HTTP FastAPI).
+- `fuzzyirrigation` : contrôleur flou d'irrigation (base de 13 règles, CLI `fuzzyirrigation`).
+- Jeu de données synthétique de 40 joueurs et script de génération reproductible.
+- Documentation complète (fondements, architecture, référence du moteur, applications, guide
+  développeur, déploiement, qualité, ADR, glossaire), Dockerfile et docker-compose.
+- Robustesse aux frontières (suite à revue de code) : rejet des valeurs `NaN`/`inf` dans le CSV,
+  le domaine et l'API (422), normalisation de toutes les erreurs d'E/S en erreurs métier, repli
+  Windows-1252 pour les CSV Excel, ensembles de sortie vides signalés par le défuzzifieur,
+  pipelines mal ordonnés refusés au chargement, API synchrone en pool de threads avec validation
+  des bases au démarrage, règle S15 rendue cohérente avec S2/S3.

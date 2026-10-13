@@ -1,0 +1,71 @@
+# Profil (commun à tous les postes) : âge, temps de jeu observable, fiabilité physique.
+
+[system]
+name = "profil_commun"
+description = "Score de profil : maturité, temps de jeu, disponibilité"
+
+[[inputs]]
+ref = "age"
+[[inputs]]
+ref = "minutes_jouees"
+[[inputs]]
+ref = "blessures_jours"
+
+[[outputs]]
+ref = "profil"
+
+[[rules]]
+id = "F1"
+text = "SI age EST jeune ET minutes_jouees EST eleve ET blessures_jours EST faible ALORS profil EST excellente"
+description = "Jeune déjà titulaire et disponible : fort potentiel de valorisation"
+
+[[rules]]
+id = "F2"
+text = "SI age EST jeune ET minutes_jouees EST moyen ALORS profil EST bonne"
+
+[[rules]]
+id = "F3"
+text = "SI age EST jeune ET minutes_jouees EST faible ALORS profil EST moyenne"
+description = "Potentiel, mais statistiques peu observables"
+
+[[rules]]
+id = "F4"
+text = "SI age EST prime ET minutes_jouees EST eleve ET blessures_jours EST faible ALORS profil EST excellente"
+
+[[rules]]
+id = "F5"
+text = "SI age EST prime ET minutes_jouees EST moyen ALORS profil EST bonne"
+
+[[rules]]
+id = "F6"
+text = "SI age EST prime ET minutes_jouees EST faible ALORS profil EST moyenne"
+weight = 0.8
+
+[[rules]]
+id = "F7"
+text = "SI age EST veteran ET minutes_jouees EST eleve ET blessures_jours EST faible ALORS profil EST bonne"
+description = "Vétéran encore fiable"
+
+[[rules]]
+id = "F8"
+text = "SI age EST veteran ET minutes_jouees N'EST PAS eleve ALORS profil EST faible"
+
+[[rules]]
+id = "F9"
+text = "SI blessures_jours EST eleve ALORS profil EST faible"
+weight = 0.9
+description = "Indisponibilité importante"
+
+[[rules]]
+id = "F10"
+text = "SI blessures_jours EST moyen ET age EST veteran ALORS profil EST faible"
+weight = 0.7
+
+[[rules]]
+id = "F11"
+text = "SI blessures_jours EST moyen ET age N'EST PAS veteran ALORS profil EST moyenne"
+weight = 0.6
+
+[[rules]]
+id = "F12"
+text = "SI age EST veteran ET minutes_jouees EST eleve ET blessures_jours EST moyen ALORS profil EST moyenne"

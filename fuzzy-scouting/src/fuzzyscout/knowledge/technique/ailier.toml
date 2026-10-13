@@ -1,0 +1,81 @@
+# Technique de l'ailier : percussion (dribbles tentés et réussis), passes décisives, buts.
+
+[system]
+name = "technique_ailier"
+description = "Score technique d'un ailier"
+
+[[inputs]]
+ref = "dribbles_p90"
+[[inputs]]
+ref = "dribbles_reussis_pct"
+[[inputs]]
+ref = "passes_decisives_p90"
+[[inputs]]
+ref = "buts_p90"
+
+[[outputs]]
+ref = "technique"
+
+[[rules]]
+id = "A1"
+text = "SI dribbles_p90 EST eleve ET dribbles_reussis_pct EST bon ALORS technique EST excellente"
+description = "Dribbleur prolifique et efficace"
+
+[[rules]]
+id = "A2"
+text = "SI dribbles_p90 EST eleve ET dribbles_reussis_pct EST moyen ALORS technique EST bonne"
+
+[[rules]]
+id = "A3"
+text = "SI dribbles_p90 EST eleve ET dribbles_reussis_pct EST faible ALORS technique EST moyenne"
+description = "Tente beaucoup, réussit peu : pertes de balle"
+
+[[rules]]
+id = "A4"
+text = "SI passes_decisives_p90 EST eleve ET buts_p90 N'EST PAS faible ALORS technique EST excellente"
+description = "Décisif dans les deux registres"
+
+[[rules]]
+id = "A5"
+text = "SI passes_decisives_p90 EST eleve ALORS technique EST bonne"
+weight = 0.8
+
+[[rules]]
+id = "A6"
+text = "SI buts_p90 EST eleve ALORS technique EST bonne"
+weight = 0.8
+
+[[rules]]
+id = "A7"
+text = "SI dribbles_p90 EST moyen ET dribbles_reussis_pct EST bon ALORS technique EST bonne"
+
+[[rules]]
+id = "A8"
+text = "SI dribbles_p90 EST moyen ET dribbles_reussis_pct EST moyen ALORS technique EST moyenne"
+
+[[rules]]
+id = "A9"
+text = "SI dribbles_p90 EST faible ET passes_decisives_p90 EST faible ET buts_p90 EST faible ALORS technique EST faible"
+
+[[rules]]
+id = "A10"
+text = "SI dribbles_reussis_pct EST faible ET passes_decisives_p90 EST faible ALORS technique EST faible"
+weight = 0.8
+
+[[rules]]
+id = "A11"
+text = "SI dribbles_p90 EST faible ET passes_decisives_p90 N'EST PAS faible ALORS technique EST moyenne"
+weight = 0.7
+description = "Ailier de passe plutôt que de percussion"
+
+[[rules]]
+id = "A12"
+text = "SI dribbles_p90 EST moyen ALORS technique EST moyenne"
+weight = 0.4
+description = "Règle de couverture"
+
+[[rules]]
+id = "A13"
+text = "SI dribbles_p90 EST faible ALORS technique EST faible"
+weight = 0.4
+description = "Règle de couverture"

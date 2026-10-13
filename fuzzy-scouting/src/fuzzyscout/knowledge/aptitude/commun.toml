@@ -1,0 +1,92 @@
+# Agrégation finale (commune à tous les postes) : technique, physique et profil -> aptitude.
+# La technique domine ; le physique et le profil modulent (bonus / malus).
+
+[system]
+name = "aptitude_commune"
+description = "Aptitude globale au poste à partir des trois scores intermédiaires"
+
+[[inputs]]
+ref = "technique"
+[[inputs]]
+ref = "physique"
+[[inputs]]
+ref = "profil"
+
+[[outputs]]
+ref = "aptitude"
+
+[[rules]]
+id = "S1"
+text = "SI technique EST excellente ET physique N'EST PAS faible ET profil N'EST PAS faible ALORS aptitude EST excellente"
+
+[[rules]]
+id = "S2"
+text = "SI technique EST excellente ET physique EST faible ALORS aptitude EST bonne"
+description = "Talent limité par l'athlétisme"
+
+[[rules]]
+id = "S3"
+text = "SI technique EST excellente ET profil EST faible ALORS aptitude EST bonne"
+description = "Talent avéré mais risque (âge, blessures, temps de jeu)"
+
+[[rules]]
+id = "S4"
+text = "SI technique EST bonne ET physique EST excellente ET profil N'EST PAS faible ALORS aptitude EST excellente"
+weight = 0.9
+
+[[rules]]
+id = "S5"
+text = "SI technique EST bonne ET profil EST excellente ET physique N'EST PAS faible ALORS aptitude EST excellente"
+weight = 0.7
+description = "Bon niveau et profil idéal (jeune titulaire disponible)"
+
+[[rules]]
+id = "S6"
+text = "SI technique EST bonne ET physique EST bonne ALORS aptitude EST bonne"
+
+[[rules]]
+id = "S7"
+text = "SI technique EST bonne ET physique EST moyenne ALORS aptitude EST bonne"
+weight = 0.8
+
+[[rules]]
+id = "S8"
+text = "SI technique EST bonne ET physique EST faible ALORS aptitude EST moyenne"
+
+[[rules]]
+id = "S9"
+text = "SI technique EST bonne ET profil EST faible ET physique N'EST PAS excellente ALORS aptitude EST moyenne"
+weight = 0.8
+
+[[rules]]
+id = "S10"
+text = "SI technique EST moyenne ET physique EST excellente ET profil EST excellente ALORS aptitude EST bonne"
+description = "Athlète au profil idéal : marge de progression technique"
+
+[[rules]]
+id = "S11"
+text = "SI technique EST moyenne ET physique EST bonne ET profil EST bonne ALORS aptitude EST bonne"
+weight = 0.6
+
+[[rules]]
+id = "S12"
+text = "SI technique EST moyenne ET physique N'EST PAS faible ALORS aptitude EST moyenne"
+
+[[rules]]
+id = "S13"
+text = "SI technique EST moyenne ET physique EST faible ALORS aptitude EST faible"
+weight = 0.8
+
+[[rules]]
+id = "S14"
+text = "SI technique EST faible ALORS aptitude EST faible"
+
+[[rules]]
+id = "S15"
+text = "SI profil EST faible ET physique EST faible ET technique N'EST PAS excellente ALORS aptitude EST faible"
+description = "Cumul de risques sans talent exceptionnel pour le compenser (voir S2/S3 sinon)"
+
+[[rules]]
+id = "S16"
+text = "SI technique EST bonne ET physique EST excellente ET profil EST faible ALORS aptitude EST bonne"
+description = "Athlète de bon niveau malgré un profil à risque"

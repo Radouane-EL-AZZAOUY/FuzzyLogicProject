@@ -1,0 +1,59 @@
+# Catalogue des postes évalués.
+# Chaque poste chaîne des bases de connaissances (étapes) ; les sorties d'une étape
+# alimentent les suivantes. La dernière étape produit la variable finale « aptitude ».
+# Ajouter un poste = ajouter une entrée ici (et, si besoin, un fichier technique/<poste>.toml).
+
+[[positions]]
+code = "gardien"
+label = "Gardien de but"
+description = "Arrêts, buts encaissés, jeu au pied, envergure et domination aérienne."
+stages = [
+  "technique/gardien.toml",
+  "physique/gardien.toml",
+  "profil/commun.toml",
+  "aptitude/commun.toml",
+]
+
+[[positions]]
+code = "defenseur_central"
+label = "Défenseur central"
+description = "Duels aériens, interceptions, tacles et qualité de relance."
+stages = [
+  "technique/defenseur_central.toml",
+  "physique/joueur_de_champ.toml",
+  "profil/commun.toml",
+  "aptitude/commun.toml",
+]
+
+[[positions]]
+code = "milieu_central"
+label = "Milieu central"
+description = "Précision et progression du jeu, création, récupération."
+stages = [
+  "technique/milieu_central.toml",
+  "physique/joueur_de_champ.toml",
+  "profil/commun.toml",
+  "aptitude/commun.toml",
+]
+
+[[positions]]
+code = "ailier"
+label = "Ailier"
+description = "Dribble, percussion, passes décisives et apport offensif."
+stages = [
+  "technique/ailier.toml",
+  "physique/joueur_de_champ.toml",
+  "profil/commun.toml",
+  "aptitude/commun.toml",
+]
+
+[[positions]]
+code = "attaquant"
+label = "Attaquant de pointe"
+description = "Finition, volume d'occasions (xG), adresse et participation au jeu."
+stages = [
+  "technique/attaquant.toml",
+  "physique/joueur_de_champ.toml",
+  "profil/commun.toml",
+  "aptitude/commun.toml",
+]

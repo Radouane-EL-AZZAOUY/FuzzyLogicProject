@@ -1,0 +1,49 @@
+# Physique du gardien : envergure et domination aérienne.
+
+[system]
+name = "physique_gardien"
+description = "Score physique d'un gardien de but"
+
+[[inputs]]
+ref = "taille_cm"
+[[inputs]]
+ref = "sorties_aeriennes_p90"
+
+[[outputs]]
+ref = "physique"
+
+[[rules]]
+id = "PG1"
+text = "SI taille_cm EST grand ET sorties_aeriennes_p90 EST eleve ALORS physique EST excellente"
+
+[[rules]]
+id = "PG2"
+text = "SI taille_cm EST grand ET sorties_aeriennes_p90 EST moyen ALORS physique EST bonne"
+
+[[rules]]
+id = "PG3"
+text = "SI taille_cm EST grand ET sorties_aeriennes_p90 EST faible ALORS physique EST moyenne"
+description = "Grand mais peu dominant dans les airs"
+
+[[rules]]
+id = "PG4"
+text = "SI taille_cm EST moyen ET sorties_aeriennes_p90 EST eleve ALORS physique EST bonne"
+
+[[rules]]
+id = "PG5"
+text = "SI taille_cm EST moyen ET sorties_aeriennes_p90 EST moyen ALORS physique EST moyenne"
+
+[[rules]]
+id = "PG6"
+text = "SI taille_cm EST moyen ET sorties_aeriennes_p90 EST faible ALORS physique EST faible"
+weight = 0.8
+
+[[rules]]
+id = "PG7"
+text = "SI taille_cm EST petit ALORS physique EST faible"
+
+[[rules]]
+id = "PG8"
+text = "SI taille_cm EST petit ET sorties_aeriennes_p90 EST eleve ALORS physique EST moyenne"
+weight = 0.6
+description = "Compense sa taille par son activité aérienne"

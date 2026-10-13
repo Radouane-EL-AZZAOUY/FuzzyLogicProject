@@ -1,0 +1,17 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: fuzzy-scouting:0.1.0
+    ports:
+      - "8000:8000"
+    environment:
+      FUZZYSCOUT_LOG_LEVEL: INFO
+      # Pour utiliser vos propres données / bases de connaissances, montez-les et
+      # pointez ces variables dessus :
+      # FUZZYSCOUT_PLAYERS_CSV: /data/joueurs.csv
+      # FUZZYSCOUT_KNOWLEDGE_DIR: /data/knowledge
+    # volumes:
+    #   - ./data:/data:ro
+    restart: unless-stopped

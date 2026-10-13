@@ -1,0 +1,73 @@
+# Physique des joueurs de champ : vitesse de pointe, volume de course, jeu aérien, taille.
+
+[system]
+name = "physique_joueur_de_champ"
+description = "Score physique d'un joueur de champ"
+
+[[inputs]]
+ref = "vitesse_max_kmh"
+[[inputs]]
+ref = "distance_km_p90"
+[[inputs]]
+ref = "duels_aeriens_pct"
+[[inputs]]
+ref = "taille_cm"
+
+[[outputs]]
+ref = "physique"
+
+[[rules]]
+id = "P1"
+text = "SI vitesse_max_kmh EST rapide ET distance_km_p90 EST elevee ALORS physique EST excellente"
+
+[[rules]]
+id = "P2"
+text = "SI vitesse_max_kmh EST rapide ET distance_km_p90 EST moyenne ALORS physique EST bonne"
+
+[[rules]]
+id = "P3"
+text = "SI vitesse_max_kmh EST moyenne ET distance_km_p90 EST elevee ALORS physique EST bonne"
+
+[[rules]]
+id = "P4"
+text = "SI vitesse_max_kmh EST moyenne ET distance_km_p90 EST moyenne ALORS physique EST moyenne"
+
+[[rules]]
+id = "P5"
+text = "SI vitesse_max_kmh EST rapide ET distance_km_p90 EST faible ALORS physique EST moyenne"
+description = "Explosif mais faible volume de course"
+
+[[rules]]
+id = "P6"
+text = "SI vitesse_max_kmh EST lente ET distance_km_p90 EST elevee ALORS physique EST moyenne"
+description = "Gros volume de course sans vitesse de pointe"
+
+[[rules]]
+id = "P7"
+text = "SI vitesse_max_kmh EST lente ET distance_km_p90 EST moyenne ALORS physique EST moyenne"
+weight = 0.8
+
+[[rules]]
+id = "P8"
+text = "SI vitesse_max_kmh EST moyenne ET distance_km_p90 EST faible ALORS physique EST faible"
+weight = 0.7
+
+[[rules]]
+id = "P9"
+text = "SI vitesse_max_kmh EST lente ET distance_km_p90 EST faible ALORS physique EST faible"
+
+[[rules]]
+id = "P10"
+text = "SI duels_aeriens_pct EST eleve ET taille_cm EST grand ALORS physique EST bonne"
+weight = 0.7
+description = "Présence physique et aérienne"
+
+[[rules]]
+id = "P11"
+text = "SI vitesse_max_kmh EST lente ET duels_aeriens_pct EST eleve ET taille_cm EST grand ALORS physique EST moyenne"
+description = "Profil imposant plutôt que véloce"
+
+[[rules]]
+id = "P12"
+text = "SI distance_km_p90 EST faible ET duels_aeriens_pct EST faible ALORS physique EST faible"
+weight = 0.8

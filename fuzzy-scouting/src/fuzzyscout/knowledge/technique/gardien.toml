@@ -1,0 +1,67 @@
+# Technique du gardien : taux d'arrêts, buts encaissés, jeu au pied.
+
+[system]
+name = "technique_gardien"
+description = "Score technique d'un gardien de but"
+
+[[inputs]]
+ref = "arrets_pct"
+[[inputs]]
+ref = "buts_encaisses_p90"
+[[inputs]]
+ref = "precision_passes_pct"
+
+[[outputs]]
+ref = "technique"
+
+[[rules]]
+id = "G1"
+text = "SI arrets_pct EST eleve ET buts_encaisses_p90 EST faible ALORS technique EST excellente"
+
+[[rules]]
+id = "G2"
+text = "SI arrets_pct EST eleve ET buts_encaisses_p90 EST moyen ALORS technique EST bonne"
+
+[[rules]]
+id = "G3"
+text = "SI arrets_pct EST eleve ET buts_encaisses_p90 EST eleve ALORS technique EST moyenne"
+description = "Très sollicité derrière une défense exposée"
+
+[[rules]]
+id = "G4"
+text = "SI arrets_pct EST moyen ET buts_encaisses_p90 EST faible ALORS technique EST bonne"
+
+[[rules]]
+id = "G5"
+text = "SI arrets_pct EST moyen ET buts_encaisses_p90 EST moyen ALORS technique EST moyenne"
+
+[[rules]]
+id = "G6"
+text = "SI arrets_pct EST moyen ET buts_encaisses_p90 EST eleve ALORS technique EST faible"
+weight = 0.8
+
+[[rules]]
+id = "G7"
+text = "SI arrets_pct EST faible ET buts_encaisses_p90 EST eleve ALORS technique EST faible"
+
+[[rules]]
+id = "G8"
+text = "SI arrets_pct EST faible ALORS technique EST faible"
+weight = 0.8
+
+[[rules]]
+id = "G9"
+text = "SI precision_passes_pct EST bonne ET arrets_pct N'EST PAS faible ALORS technique EST bonne"
+weight = 0.6
+description = "Jeu au pied valorisé pour la relance"
+
+[[rules]]
+id = "G10"
+text = "SI precision_passes_pct EST faible ET arrets_pct EST moyen ALORS technique EST moyenne"
+weight = 0.5
+
+[[rules]]
+id = "G11"
+text = "SI arrets_pct EST moyen ALORS technique EST moyenne"
+weight = 0.4
+description = "Règle de couverture"

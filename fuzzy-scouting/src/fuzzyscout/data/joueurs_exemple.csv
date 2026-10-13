@@ -1,0 +1,41 @@
+id,nom,club,nationalite,poste,age,taille_cm,minutes_jouees,blessures_jours,contrat_mois_restants,valeur_marche_meur,buts_p90,xg_p90,passes_decisives_p90,tirs_cadres_pct,passes_cles_p90,precision_passes_pct,passes_progressives_p90,dribbles_p90,dribbles_reussis_pct,tacles_p90,interceptions_p90,duels_aeriens_pct,vitesse_max_kmh,distance_km_p90,arrets_pct,buts_encaisses_p90,sorties_aeriennes_p90
+P001,Jonas Tazi,FC Atlas,SN,gardien,30,186,2718,41,34,15.1,,,,,,82.7,,,,,,,,,77.5,0.79,1.69
+P002,Ayoub Haddad,Racing Sahara,MA,gardien,23,183,1551,34,9,1.6,,,,,,63.6,,,,,,,,,61.8,1.91,0.72
+P003,Driss Ouazzani,Sporting Souss,SN,gardien,26,191,2387,3,37,25.9,,,,,,84.1,,,,,,,,,78.7,0.69,1.65
+P004,Younes Kone,Olympique du Détroit,DZ,gardien,29,185,1734,14,43,9.8,,,,,,65.6,,,,,,,,,71.4,1.2,0.45
+P005,Idris Diallo,AS Rif,TN,gardien,22,183,1676,15,12,2.2,,,,,,67.4,,,,,,,,,64.8,1.59,0.79
+P006,Walid Benjelloun,Racing Sahara,MA,gardien,33,192,3045,104,16,4.8,,,,,,82.8,,,,,,,,,74.3,1.3,0.83
+P007,Driss El Amrani,Union Chaouia,MA,defenseur_central,30,196,2059,14,37,6.2,0.11,0.03,0.11,38.2,0.68,85.0,3.77,0.46,43.6,2.24,1.85,59.7,32.7,10.4,,,
+P008,Tiago Slaoui,Stade Tensift,FR,defenseur_central,21,195,2080,53,20,2.3,0.05,0.08,0.05,35.5,0.37,74.4,3.78,0.47,43.3,1.65,1.05,58.1,30.8,9.99,,,
+P009,Soufiane Bakkali,Racing Sahara,DZ,defenseur_central,21,186,2829,35,15,2.0,0.02,0.02,0.03,21.6,0.73,79.8,3.93,0.37,44.8,1.87,1.35,49.5,31.7,9.57,,,
+P010,Rachid Costa,Stade Tensift,DZ,defenseur_central,24,189,1339,3,19,2.5,0.06,0.07,0.06,22.8,0.5,77.7,3.42,0.77,38.1,1.93,1.46,55.7,29.6,10.5,,,
+P011,Soufiane Belkadi,Dynamo Zerhoun,MA,defenseur_central,20,192,1635,35,18,7.3,0.08,0.05,0.01,34.3,0.51,85.7,4.32,0.57,47.2,2.5,1.74,59.7,30.2,9.61,,,
+P012,Sofiane Ndiaye,Racing Sahara,DZ,defenseur_central,26,186,1637,54,23,1.2,0.05,0.05,0.03,31.4,0.52,79.8,2.47,0.24,39.3,2.26,0.66,57.3,31.7,10.1,,,
+P013,Reda Ouazzani,Dynamo Zerhoun,ES,defenseur_central,34,190,2790,9,21,4.2,0.09,0.1,0.05,33.0,1.13,84.4,4.66,0.32,48.4,2.2,1.86,69.8,31.6,10.4,,,
+P014,Karim Diallo,Olympique du Détroit,SN,defenseur_central,19,192,3046,57,45,23.0,0.05,0.04,0.12,39.0,0.69,86.0,5.1,0.83,60.8,2.95,2.33,70.9,33.9,11.0,,,
+P015,Nassim Diallo,Dynamo Zerhoun,MA,milieu_central,25,184,2720,65,37,9.5,0.16,0.08,0.15,32.5,1.94,85.3,5.57,1.43,50.6,2.23,2.32,48.6,33.6,11.2,,,
+P016,Driss Traoré,FC Atlas,SN,milieu_central,31,175,1995,80,37,4.0,0.08,0.1,0.05,27.1,1.25,84.7,5.08,1.01,46.2,2.22,1.54,46.1,32.2,11.4,,,
+P017,Adam Dubois,Étoile de l'Oriental,TN,milieu_central,27,176,2277,0,29,20.5,0.12,0.12,0.14,41.5,2.1,87.4,6.66,1.84,60.1,2.91,2.44,55.1,32.3,12.2,,,
+P018,Mateo Berrada,AS Rif,MA,milieu_central,22,187,1474,40,37,6.5,0.02,0.11,0.06,29.3,1.2,85.0,5.47,1.12,46.6,2.01,1.34,46.8,30.6,10.9,,,
+P019,Moussa Ouazzani,Racing Sahara,CI,milieu_central,23,179,2463,55,9,6.7,0.03,0.07,0.05,28.1,1.18,87.8,4.74,1.25,50.9,2.06,2.0,47.5,32.6,11.6,,,
+P020,Samir Slaoui,Dynamo Zerhoun,PT,milieu_central,28,185,2098,46,3,32.1,0.19,0.2,0.11,39.6,2.59,87.6,7.46,2.08,56.3,3.49,2.71,58.7,33.6,11.8,,,
+P021,Driss Benjelloun,Dynamo Zerhoun,PT,milieu_central,31,179,3432,0,36,24.7,0.23,0.15,0.1,57.0,2.73,89.2,9.88,2.64,63.0,2.58,2.46,58.9,34.0,12.4,,,
+P022,Malik Dubois,Étoile de l'Oriental,CI,milieu_central,30,178,562,55,24,4.0,0.13,0.08,0.03,38.3,1.08,81.4,5.15,1.58,54.9,2.06,1.63,49.9,31.9,10.6,,,
+P023,Nabil Fassi,Athletic Bouregreg,MA,milieu_central,28,172,3221,57,20,41.2,0.21,0.08,0.1,43.9,2.14,92.6,8.96,2.26,53.2,2.62,2.4,45.2,33.3,12.0,,,
+P024,Idris Belkadi,AS Rif,ES,ailier,20,181,1342,12,38,2.9,0.21,0.18,0.14,40.0,1.92,75.5,2.35,3.18,48.6,1.26,0.64,43.8,33.4,10.7,,,
+P025,Reda Belkadi,Sporting Souss,PT,ailier,21,170,2377,81,21,19.0,0.29,0.28,0.38,39.3,1.75,79.6,2.22,3.14,65.1,1.8,1.15,53.2,34.3,11.7,,,
+P026,Rachid El Amrani,Stade Tensift,FR,ailier,31,179,1401,10,39,2.5,0.17,0.18,0.26,38.9,2.03,75.5,3.16,2.38,51.7,0.97,0.8,44.7,32.3,11.0,,,
+P027,Noah Kettani,Sporting Souss,MA,ailier,30,176,2127,56,5,7.9,0.26,0.23,0.3,43.2,2.0,78.9,3.72,3.62,55.9,0.95,1.06,51.2,33.4,11.5,,,
+P028,Samir Ndiaye,Dynamo Zerhoun,DZ,ailier,28,180,2657,8,31,25.2,0.36,0.21,0.39,42.6,2.09,84.7,4.38,5.3,54.6,1.88,1.24,55.6,34.8,11.1,,,
+P029,Ilias Ziani,Dynamo Zerhoun,MA,ailier,32,179,1475,10,28,2.4,0.11,0.23,0.22,32.9,1.74,73.2,2.32,3.81,51.6,1.12,1.36,38.5,32.4,10.2,,,
+P030,Driss Saidi,Racing Sahara,FR,ailier,33,169,2646,67,8,3.1,0.36,0.26,0.18,34.7,1.82,79.0,2.85,3.39,55.6,1.19,1.09,52.7,35.1,11.4,,,
+P031,Walid Diallo,Racing Sahara,TN,ailier,33,173,1627,120,14,0.6,0.08,0.01,0.1,22.0,1.07,79.5,2.56,2.12,50.2,0.62,0.36,37.7,33.1,10.3,,,
+P032,Oussama Ouazzani,FC Atlas,EG,attaquant,34,182,964,89,15,0.4,0.25,0.35,0.06,39.0,0.59,71.1,0.87,0.99,37.4,0.46,0.56,46.2,31.2,9.85,,,
+P033,Soufiane Lambert,Athletic Bouregreg,EG,attaquant,21,191,2842,41,11,16.1,0.58,0.49,0.24,43.4,1.72,76.1,2.74,2.46,44.9,0.71,0.56,49.1,31.6,10.6,,,
+P034,Hicham Moreno,Stade Tensift,SN,attaquant,19,179,2515,43,44,10.0,0.51,0.43,0.21,45.5,1.28,70.6,1.89,2.15,54.5,0.34,0.68,55.1,32.7,10.7,,,
+P035,Elias Slaoui,Olympique du Détroit,MA,attaquant,24,189,2070,10,30,19.7,0.63,0.69,0.27,55.8,1.59,75.8,1.86,2.16,46.3,0.84,0.46,57.1,33.2,11.4,,,
+P036,Rachid Haddad,Racing Sahara,EG,attaquant,20,188,2686,26,31,45.0,0.95,0.59,0.31,53.3,2.21,83.7,3.61,3.0,66.6,1.2,0.72,63.3,34.5,12.1,,,
+P037,Ilyes Rami,AS Rif,FR,attaquant,18,177,2543,67,34,7.6,0.44,0.44,0.12,42.3,1.76,75.8,2.03,2.54,50.9,0.43,0.84,41.4,32.5,10.1,,,
+P038,Hamza Ndiaye,Olympique du Détroit,MA,attaquant,29,187,2841,31,36,24.8,0.8,0.7,0.21,46.1,1.76,80.9,3.5,2.59,48.4,0.86,0.77,70.3,34.3,11.1,,,
+P039,Reda Sefrioui,Athletic Bouregreg,FR,attaquant,20,192,1005,44,17,8.8,0.42,0.46,0.04,42.9,1.29,74.1,2.12,1.55,53.6,0.64,0.63,47.1,33.2,11.0,,,
+P040,Walid Hajji,Union Chaouia,MA,attaquant,25,189,3003,2,22,28.1,0.69,0.66,0.31,54.4,1.97,77.5,2.93,2.28,51.5,0.72,0.65,66.7,33.6,11.3,,,

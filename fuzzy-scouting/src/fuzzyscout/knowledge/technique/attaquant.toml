@@ -1,0 +1,82 @@
+# Technique de l'attaquant de pointe : finition réelle (buts), volume d'occasions (xG),
+# adresse (tirs cadrés) et participation au jeu (passes clés).
+
+[system]
+name = "technique_attaquant"
+description = "Score technique d'un attaquant de pointe"
+
+[[inputs]]
+ref = "buts_p90"
+[[inputs]]
+ref = "xg_p90"
+[[inputs]]
+ref = "tirs_cadres_pct"
+[[inputs]]
+ref = "passes_cles_p90"
+
+[[outputs]]
+ref = "technique"
+
+[[rules]]
+id = "T1"
+text = "SI buts_p90 EST eleve ET tirs_cadres_pct EST bonne ALORS technique EST excellente"
+description = "Buteur prolifique et adroit"
+
+[[rules]]
+id = "T2"
+text = "SI buts_p90 EST eleve ET tirs_cadres_pct N'EST PAS bonne ALORS technique EST bonne"
+description = "Efficace malgré une adresse perfectible"
+
+[[rules]]
+id = "T3"
+text = "SI buts_p90 EST eleve ET passes_cles_p90 EST eleve ALORS technique EST excellente"
+description = "Buteur complet, impliqué dans la création"
+
+[[rules]]
+id = "T4"
+text = "SI buts_p90 EST moyen ET xg_p90 EST eleve ALORS technique EST bonne"
+description = "Se procure beaucoup d'occasions ; finition à confirmer"
+
+[[rules]]
+id = "T5"
+text = "SI buts_p90 EST moyen ET tirs_cadres_pct EST bonne ET passes_cles_p90 EST eleve ALORS technique EST bonne"
+
+[[rules]]
+id = "T6"
+text = "SI buts_p90 EST moyen ET xg_p90 EST moyen ALORS technique EST moyenne"
+
+[[rules]]
+id = "T7"
+text = "SI buts_p90 EST moyen ET xg_p90 EST faible ET passes_cles_p90 EST faible ALORS technique EST moyenne"
+weight = 0.8
+
+[[rules]]
+id = "T8"
+text = "SI buts_p90 EST faible ET xg_p90 EST eleve ALORS technique EST moyenne"
+description = "Sous-performe ses xG : régression à la moyenne probable"
+
+[[rules]]
+id = "T9"
+text = "SI buts_p90 EST faible ET passes_cles_p90 EST eleve ALORS technique EST moyenne"
+weight = 0.8
+description = "Apport créatif compensant partiellement le manque de buts"
+
+[[rules]]
+id = "T10"
+text = "SI buts_p90 EST faible ET xg_p90 EST faible ALORS technique EST faible"
+
+[[rules]]
+id = "T11"
+text = "SI buts_p90 EST faible ET tirs_cadres_pct EST faible ALORS technique EST faible"
+
+[[rules]]
+id = "T12"
+text = "SI buts_p90 EST moyen ALORS technique EST moyenne"
+weight = 0.5
+description = "Règle de couverture"
+
+[[rules]]
+id = "T13"
+text = "SI buts_p90 EST faible ALORS technique EST faible"
+weight = 0.5
+description = "Règle de couverture"
