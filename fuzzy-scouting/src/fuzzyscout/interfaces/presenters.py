@@ -11,9 +11,13 @@ from typing import Any
 
 from fuzzyengine import (
     FRENCH,
+    Category,
+    Degrees,
     EvaluationResult,
     FuzzyPipeline,
+    Interval,
     LinguisticVariable,
+    Observation,
     Rule,
     RuleActivation,
     Syntax,
@@ -25,6 +29,7 @@ from fuzzyengine.explanation import (
     indent,
 )
 from fuzzyscout.application.scouting_service import KnowledgeSummary
+from fuzzyscout.domain.command import HIGHEST_LEVEL, CommandEvaluation, CommandRanking
 from fuzzyscout.domain.evaluation import PlayerEvaluation, RankingReport
 from fuzzyscout.domain.player import Player
 from fuzzyscout.domain.position import Position
@@ -69,6 +74,23 @@ def activation_to_dict(activation: RuleActivation, syntax: Syntax = FRENCH) -> d
     }
 
 
+def observation_to_dict(observation: Observation) -> dict[str, Any]:
+    """An observation with its kind: ``valeur``, ``intervalle``, ``categorie`` or ``degres``."""
+    if isinstance(observation, Interval):
+        return {
+            "type": "intervalle",
+            "min": observation.lower,
+            "max": observation.upper,
+            "texte": str(observation),
+        }
+    if isinstance(observation, Category):
+        return {"type": "categorie", "terme": observation.term, "texte": observation.term}
+    if isinstance(observation, Degrees):
+        degrees = {term: round(degree, 4) for term, degree in observation.degrees.items()}
+        return {"type": "degres", "degres": degrees, "texte": str(observation)}
+    return {"type": "valeur", "valeur": observation, "texte": f"{observation:g}"}
+
+
 def stage_to_dict(stage: EvaluationResult, limit: int | None = 5) -> dict[str, Any]:
     fired = stage.fired_rules()
     if limit is not None:
@@ -76,6 +98,10 @@ def stage_to_dict(stage: EvaluationResult, limit: int | None = 5) -> dict[str, A
     return {
         "systeme": stage.system_name,
         "entrees": {k: round(v, 4) for k, v in stage.inputs.items()},
+        "observations": {k: observation_to_dict(v) for k, v in stage.observations.items()},
+        "conclusions": {
+            k: {t: round(d, 4) for t, d in terms.items()} for k, terms in stage.conclusions.items()
+        },
         "entrees_floues": {
             k: {t: round(d, 4) for t, d in terms.items()}
             for k, terms in stage.fuzzified_inputs.items()
@@ -200,6 +226,87 @@ def pipeline_to_dict(position: Position, pipeline: FuzzyPipeline) -> dict[str, A
     }
 
 
+def command_to_dict(pipeline: FuzzyPipeline) -> dict[str, Any]:
+    """The whole « commande Scout » system: stages, readable rules and variables."""
+    variables: dict[str, LinguisticVariable] = {}
+    for stage in pipeline.stages:
+        variables.update(stage.inputs)
+        variables.update(stage.outputs)
+    final = pipeline.final_outputs[0]
+    return {
+        "code": pipeline.name,
+        "libelle": pipeline.description,
+        "chainage": pipeline.chaining,
+        "niveaux": HIGHEST_LEVEL,
+        "sortie": final,
+        "variables_deduites": [name for name in pipeline.produced_outputs if name != final],
+        "entrees_requises": list(pipeline.required_inputs),
+        "etapes": [
+            {
+                "nom": stage.name,
+                "description": stage.description,
+                "entrees": list(stage.input_names),
+                "sorties": list(stage.output_names),
+                "regles": [rule_to_dict(rule) for rule in stage.rule_base],
+            }
+            for stage in pipeline.stages
+        ],
+        "variables": [variable_to_dict(variable) for variable in variables.values()],
+    }
+
+
+def command_evaluation_to_dict(
+    evaluation: CommandEvaluation, include_trace: bool = False
+) -> dict[str, Any]:
+    player = evaluation.player
+    conclusions = evaluation.conclusions
+    data: dict[str, Any] = {
+        "joueur": {
+            "id": player.identifier,
+            "nom": player.name,
+            "club": player.club,
+            "nationalite": player.nationality,
+            "poste": player.position,
+        },
+        "niveau": evaluation.level,
+        "niveau_valeur": round(evaluation.level_value, 2),
+        "variables": {
+            name: {
+                "valeur": round(value, 1),
+                "label": evaluation.labels[name],
+                "degres": {t: round(d, 4) for t, d in conclusions[name].items()},
+            }
+            for name, value in evaluation.deduced.items()
+        },
+        "degres_niveau": {
+            term: round(degree, 4) for term, degree in conclusions[evaluation.final_output].items()
+        },
+        "observations": {
+            name: observation_to_dict(obs) for name, obs in evaluation.observations.items()
+        },
+        "avertissements": list(evaluation.warnings),
+    }
+    if include_trace:
+        data["etapes"] = [stage_to_dict(stage, limit=None) for stage in evaluation.result.stages]
+    return data
+
+
+def command_ranking_to_dict(report: CommandRanking) -> dict[str, Any]:
+    return {
+        "poste": position_to_dict(report.position) if report.position else None,
+        "candidats": report.candidates,
+        "classes": len(report.entries),
+        "classement": [
+            {"rang": rank, **command_evaluation_to_dict(evaluation)}
+            for rank, evaluation in enumerate(report.entries, start=1)
+        ],
+        "exclus": [
+            {"id": s.player.identifier, "nom": s.player.name, "raison": s.reason}
+            for s in report.skipped
+        ],
+    }
+
+
 # --- text ---------------------------------------------------------------------
 
 
@@ -300,5 +407,65 @@ def format_knowledge(summaries: Sequence[KnowledgeSummary]) -> str:
             lines.append(
                 f"      - {stage.name} : {len(stage.inputs)} entrée(s) -> "
                 f"{', '.join(stage.outputs)} ({stage.rules} règles)"
+            )
+    return "\n".join(lines)
+
+
+def _deduced_line(evaluation: CommandEvaluation) -> str:
+    return " | ".join(
+        f"{name}={value:.0f} ({evaluation.labels[name]})"
+        for name, value in evaluation.deduced.items()
+    )
+
+
+def format_command_evaluation(evaluation: CommandEvaluation, explain: bool = False) -> str:
+    player = evaluation.player
+    identity = f"{player.name} [{player.identifier}]"
+    if player.position:
+        identity += f" — {player.position}"
+    lines = [
+        identity,
+        f"Niveau : {evaluation.level} / {HIGHEST_LEVEL} (valeur {evaluation.level_value:.2f})",
+        f"Variables déduites : {_deduced_line(evaluation)}",
+    ]
+    if explain:
+        lines.append("Pourquoi :")
+        for stage in evaluation.result.stages:
+            lines.append(f"  Étape « {stage.system_name} »")
+            lines.extend(indent(explain_inputs(stage), "    "))
+            lines.extend(indent(explain_activations(stage.fired_rules(), FRENCH, 3), "    "))
+            for name, degrees in stage.conclusions.items():
+                concluded = ", ".join(f"{t}={d:.2f}" for t, d in degrees.items() if d > 0)
+                lines.append(f"    => {name} : {concluded or 'aucune règle déclenchée'}")
+    for warning in evaluation.warnings:
+        lines.append(f"[!] {warning}")
+    return "\n".join(lines)
+
+
+def format_command_ranking(report: CommandRanking) -> str:
+    scope = f"{report.position.label} ({report.position.code})" if report.position else "tous"
+    title = f"Commande Scout — joueurs : {scope}"
+    lines = [
+        title,
+        "=" * len(title),
+        f"Candidats : {report.candidates} | classés : {len(report.entries)} | "
+        f"exclus : {len(report.skipped)}",
+        "",
+        f"{'#':>3}  {'id':<6} {'nom':<22} {'poste':<18} {'niveau':>6} {'valeur':>6}  "
+        f"{'vitesse':<13} {'accélération':<13} {'tacle':<13}",
+    ]
+    for rank, e in enumerate(report.entries, start=1):
+        p = e.player
+        cells = [f"{e.deduced[n]:>3.0f} {e.labels[n]:<9}" for n in e.deduced]
+        lines.append(
+            f"{rank:>3}  {p.identifier:<6} {p.name[:22]:<22} {p.position[:18]:<18} "
+            f"{e.level:>6} {e.level_value:>6.2f}  {' '.join(cells)}"
+        )
+    if report.skipped:
+        lines.append("")
+        lines.append("Exclus :")
+        for skipped in report.skipped:
+            lines.append(
+                f"  - {skipped.player.name} [{skipped.player.identifier}] : {skipped.reason}"
             )
     return "\n".join(lines)

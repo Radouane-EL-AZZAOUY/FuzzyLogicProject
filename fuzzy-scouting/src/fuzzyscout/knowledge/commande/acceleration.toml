@@ -1,0 +1,128 @@
+# Accélération : déduite de la vitesse de changement, de la distance de
+# déplacement et du temps de réaction.
+#
+# Barème : chaque mesure rapporte 2 points (favorable), 1 point (intermédiaire) ou
+# 0 point (défavorable). Les 27 combinaisons sont couvertes :
+#   total 4 à 6 -> fort   |   total 3 -> moyenne   |   total 0 à 2 -> faible
+
+[system]
+name = "commande_acceleration"
+description = "Accélération du joueur déduite de trois mesures"
+
+[[inputs]]
+ref = "vitesse_changement_ms2"
+[[inputs]]
+ref = "distance_deplacement_m"
+[[inputs]]
+ref = "temps_reaction_s"
+
+[[outputs]]
+ref = "acceleration"
+
+[[rules]]
+id = "A1"
+text = "SI vitesse_changement_ms2 EST elevee ET distance_deplacement_m EST longue ET temps_reaction_s EST court ALORS acceleration EST fort"
+
+[[rules]]
+id = "A2"
+text = "SI vitesse_changement_ms2 EST elevee ET distance_deplacement_m EST longue ET temps_reaction_s EST moyen ALORS acceleration EST fort"
+
+[[rules]]
+id = "A3"
+text = "SI vitesse_changement_ms2 EST elevee ET distance_deplacement_m EST longue ET temps_reaction_s EST long ALORS acceleration EST fort"
+
+[[rules]]
+id = "A4"
+text = "SI vitesse_changement_ms2 EST elevee ET distance_deplacement_m EST moyenne ET temps_reaction_s EST court ALORS acceleration EST fort"
+
+[[rules]]
+id = "A5"
+text = "SI vitesse_changement_ms2 EST elevee ET distance_deplacement_m EST moyenne ET temps_reaction_s EST moyen ALORS acceleration EST fort"
+
+[[rules]]
+id = "A6"
+text = "SI vitesse_changement_ms2 EST elevee ET distance_deplacement_m EST moyenne ET temps_reaction_s EST long ALORS acceleration EST moyenne"
+
+[[rules]]
+id = "A7"
+text = "SI vitesse_changement_ms2 EST elevee ET distance_deplacement_m EST courte ET temps_reaction_s EST court ALORS acceleration EST fort"
+
+[[rules]]
+id = "A8"
+text = "SI vitesse_changement_ms2 EST elevee ET distance_deplacement_m EST courte ET temps_reaction_s EST moyen ALORS acceleration EST moyenne"
+
+[[rules]]
+id = "A9"
+text = "SI vitesse_changement_ms2 EST elevee ET distance_deplacement_m EST courte ET temps_reaction_s EST long ALORS acceleration EST faible"
+
+[[rules]]
+id = "A10"
+text = "SI vitesse_changement_ms2 EST moyenne ET distance_deplacement_m EST longue ET temps_reaction_s EST court ALORS acceleration EST fort"
+
+[[rules]]
+id = "A11"
+text = "SI vitesse_changement_ms2 EST moyenne ET distance_deplacement_m EST longue ET temps_reaction_s EST moyen ALORS acceleration EST fort"
+
+[[rules]]
+id = "A12"
+text = "SI vitesse_changement_ms2 EST moyenne ET distance_deplacement_m EST longue ET temps_reaction_s EST long ALORS acceleration EST moyenne"
+
+[[rules]]
+id = "A13"
+text = "SI vitesse_changement_ms2 EST moyenne ET distance_deplacement_m EST moyenne ET temps_reaction_s EST court ALORS acceleration EST fort"
+
+[[rules]]
+id = "A14"
+text = "SI vitesse_changement_ms2 EST moyenne ET distance_deplacement_m EST moyenne ET temps_reaction_s EST moyen ALORS acceleration EST moyenne"
+
+[[rules]]
+id = "A15"
+text = "SI vitesse_changement_ms2 EST moyenne ET distance_deplacement_m EST moyenne ET temps_reaction_s EST long ALORS acceleration EST faible"
+
+[[rules]]
+id = "A16"
+text = "SI vitesse_changement_ms2 EST moyenne ET distance_deplacement_m EST courte ET temps_reaction_s EST court ALORS acceleration EST moyenne"
+
+[[rules]]
+id = "A17"
+text = "SI vitesse_changement_ms2 EST moyenne ET distance_deplacement_m EST courte ET temps_reaction_s EST moyen ALORS acceleration EST faible"
+
+[[rules]]
+id = "A18"
+text = "SI vitesse_changement_ms2 EST moyenne ET distance_deplacement_m EST courte ET temps_reaction_s EST long ALORS acceleration EST faible"
+
+[[rules]]
+id = "A19"
+text = "SI vitesse_changement_ms2 EST faible ET distance_deplacement_m EST longue ET temps_reaction_s EST court ALORS acceleration EST fort"
+
+[[rules]]
+id = "A20"
+text = "SI vitesse_changement_ms2 EST faible ET distance_deplacement_m EST longue ET temps_reaction_s EST moyen ALORS acceleration EST moyenne"
+
+[[rules]]
+id = "A21"
+text = "SI vitesse_changement_ms2 EST faible ET distance_deplacement_m EST longue ET temps_reaction_s EST long ALORS acceleration EST faible"
+
+[[rules]]
+id = "A22"
+text = "SI vitesse_changement_ms2 EST faible ET distance_deplacement_m EST moyenne ET temps_reaction_s EST court ALORS acceleration EST moyenne"
+
+[[rules]]
+id = "A23"
+text = "SI vitesse_changement_ms2 EST faible ET distance_deplacement_m EST moyenne ET temps_reaction_s EST moyen ALORS acceleration EST faible"
+
+[[rules]]
+id = "A24"
+text = "SI vitesse_changement_ms2 EST faible ET distance_deplacement_m EST moyenne ET temps_reaction_s EST long ALORS acceleration EST faible"
+
+[[rules]]
+id = "A25"
+text = "SI vitesse_changement_ms2 EST faible ET distance_deplacement_m EST courte ET temps_reaction_s EST court ALORS acceleration EST faible"
+
+[[rules]]
+id = "A26"
+text = "SI vitesse_changement_ms2 EST faible ET distance_deplacement_m EST courte ET temps_reaction_s EST moyen ALORS acceleration EST faible"
+
+[[rules]]
+id = "A27"
+text = "SI vitesse_changement_ms2 EST faible ET distance_deplacement_m EST courte ET temps_reaction_s EST long ALORS acceleration EST faible"

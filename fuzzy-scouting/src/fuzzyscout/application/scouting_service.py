@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from fuzzyengine import FuzzyPipeline, LinguisticVariable
 from fuzzyscout.application.evaluate_player import EvaluatePlayer
 from fuzzyscout.application.rank_players import RankingRequest, RankPlayers
+from fuzzyscout.application.scout_command import ScoutCommand
 from fuzzyscout.domain.evaluation import PlayerEvaluation, RankingReport
 from fuzzyscout.domain.player import Player
 from fuzzyscout.domain.ports import PipelineProvider, PlayerRepository, PositionCatalog
@@ -41,7 +42,10 @@ class ScoutingService:
         players: PlayerRepository,
         positions: PositionCatalog,
         pipelines: PipelineProvider,
+        command: ScoutCommand | None = None,
     ) -> None:
+        self.command = command
+        """The « commande Scout » system, when its knowledge bases are available."""
         self._players = players
         self._positions = positions
         self._pipelines = pipelines

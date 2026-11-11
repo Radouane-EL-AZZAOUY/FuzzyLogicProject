@@ -19,6 +19,7 @@ from fuzzyengine.defuzzification import Centroid, Defuzzifier
 from fuzzyengine.exceptions import DefinitionError
 from fuzzyengine.fuzzification import Fuzzifier
 from fuzzyengine.inference import InferenceMethod, MamdaniInference, RuleActivation
+from fuzzyengine.observations import Observation
 from fuzzyengine.rules import Rule, RuleBase
 from fuzzyengine.variables import LinguisticVariable
 
@@ -29,7 +30,7 @@ class EvaluationResult:
 
     system_name: str
     inputs: dict[str, float]
-    """Crisp inputs actually used (after clamping)."""
+    """Precise inputs actually used (after clamping); imprecise inputs are absent."""
     fuzzified_inputs: dict[str, dict[str, float]]
     activations: tuple[RuleActivation, ...]
     outputs: dict[str, float]
@@ -37,6 +38,10 @@ class EvaluationResult:
     fuzzified_outputs: dict[str, dict[str, float]]
     """Degree of the crisp output in every output term (linguistic reading of the result)."""
     warnings: tuple[str, ...] = ()
+    observations: dict[str, Observation] = field(default_factory=dict)
+    """Every input as it was used: precise value, interval, category or degrees."""
+    conclusions: dict[str, dict[str, float]] = field(default_factory=dict)
+    """Degree to which the rules concluded each output term (before defuzzification)."""
 
     def fired_rules(self, minimum_strength: float = 0.0) -> list[RuleActivation]:
         """Activations with strength above ``minimum_strength``, strongest first."""
@@ -90,15 +95,20 @@ class FuzzySystem:
     def output_names(self) -> tuple[str, ...]:
         return tuple(self.outputs)
 
-    def evaluate(self, values: Mapping[str, float]) -> EvaluationResult:
-        """Run one full derivation for the crisp ``values`` (extra keys are ignored)."""
+    def evaluate(self, values: Mapping[str, Observation]) -> EvaluationResult:
+        """Run one full derivation for the observed ``values`` (extra keys are ignored).
+
+        Each value is a precise number, an interval, a category or explicit degrees.
+        """
         fuzzified = self._fuzzifier.fuzzify(values)
         outcome = self.inference.infer(self.rule_base, fuzzified.interpretation, self.outputs)
         warnings = list(fuzzified.warnings)
         crisp: dict[str, float] = {}
         fuzzified_outputs: dict[str, dict[str, float]] = {}
+        conclusions: dict[str, dict[str, float]] = {}
         for name, variable in self.outputs.items():
             distribution = outcome.distributions[name]
+            conclusions[name] = distribution.term_strengths()
             value = self.defuzzifier.defuzzify(distribution.membership, variable.universe)
             if value is None:
                 warnings.append(
@@ -116,6 +126,8 @@ class FuzzySystem:
             outputs=crisp,
             fuzzified_outputs=fuzzified_outputs,
             warnings=tuple(warnings),
+            observations=fuzzified.observations,
+            conclusions=conclusions,
         )
 
 

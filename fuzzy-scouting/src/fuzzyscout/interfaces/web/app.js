@@ -1,7 +1,7 @@
 /* Fuzzy Scouting — interface web (sans dépendance, sans étape de build).
  *
  * Toute la logique floue reste côté serveur : cette page ne fait qu'appeler l'API
- * (/rankings, /evaluations, /variables, /knowledge…) et présenter les réponses.
+ * (/rankings, /evaluations, /variables, /knowledge, /commande…) et présenter les réponses.
  */
 "use strict";
 
@@ -94,6 +94,8 @@ const S = {
   sim: { position: "", base: "", values: {}, result: null, error: "" },
   rulesPos: "",
   sheet: { id: "", position: "" },
+  // Système de commande Scout (niveau 1 à 6 à partir d'observations précises ou floues).
+  cmd: { sys: null, mode: "joueur", base: "", obs: {}, degrees: {}, pos: "", report: null },
 };
 
 const posLabel = (code) => (S.positions.find((p) => p.code === code) || {}).libelle || code || "—";
@@ -105,6 +107,7 @@ const shortVar = (name) =>
     .replace(/_pct$/, " %")
     .replace(/_kmh$/, " km/h")
     .replace(/_cm$/, "")
+    .replace(/_(s|m|ms2)$/, "")
     .replace(/_/g, " ");
 const decimals = (name) => {
   const v = S.vars[name];
@@ -141,19 +144,24 @@ function updateCounts() {
 // ----------------------------------------------------------------- graphiques
 
 /** Courbes d'appartenance d'une variable, avec repère vertical sur la valeur mesurée. */
-function mfChart(variable, value, { w = 240, h = 54, axis = false } = {}) {
+function mfChart(variable, value, { w = 240, h = 54, axis = false, band = null, term = null } = {}) {
   const [lo, hi] = variable.univers;
   const pad = { l: 3, r: 3, t: 5, b: axis ? 18 : 3 };
-  const X = (x) => pad.l + ((x - lo) / (hi - lo)) * (w - pad.l - pad.r);
+  const X = (x) => pad.l + ((Math.min(hi, Math.max(lo, x)) - lo) / (hi - lo)) * (w - pad.l - pad.r);
   const Y = (m) => pad.t + (1 - m) * (h - pad.t - pad.b);
   const paths = variable.termes
     .map(
       (t, i) =>
-        `<path class="s${(i % 4) + 1}" d="M${t.points.map(([x, m]) => `${X(x).toFixed(1)},${Y(m).toFixed(1)}`).join("L")}"/>`,
+        `<path class="s${(i % 4) + 1}${term && term !== t.label ? " dim" : ""}" d="M${t.points.map(([x, m]) => `${X(x).toFixed(1)},${Y(m).toFixed(1)}`).join("L")}"/>`,
     )
     .join("");
   let marker = "";
-  if (value != null) {
+  if (band) {
+    // Observation imprécise : la valeur est quelque part dans la bande.
+    const x0 = X(Math.min(band[0], band[1]));
+    const x1 = X(Math.max(band[0], band[1]));
+    marker = `<rect class="band" x="${x0.toFixed(1)}" width="${Math.max(1.5, x1 - x0).toFixed(1)}" y="${pad.t - 3}" height="${Y(0) - pad.t + 3}"/>`;
+  } else if (value != null) {
     const x = X(Math.min(hi, Math.max(lo, value))).toFixed(1);
     marker = `<line class="mark" x1="${x}" x2="${x}" y1="${pad.t - 3}" y2="${Y(0)}"/>`;
   }
@@ -706,10 +714,19 @@ async function renderRules() {
         <span>${st.entrees.length} entrée(s) · ${st.regles.length} règles</span></a></li>`,
     )
     .join("")}</ol>`;
-  const stages = kb.etapes
+  const names = [...new Set(kb.etapes.flatMap((st) => [...st.entrees, ...st.sorties]))];
+  $("#rules-body").innerHTML = `${flow}${stageRulesHtml(kb.etapes)}
+    <section class="panel"><h2>Vocabulaire <small>ce que signifient « élevé », « rapide », « jeune »…</small></h2>
+      <p class="muted small">Chaque courbe donne, pour une valeur mesurée, à quel degré (0 à 1) le mot s'applique. Survolez une courbe pour lire les degrés.</p>
+      <div class="var-grid">${varCardsHtml(names)}</div></section>`;
+}
+
+/** Les règles de chaque étape, écrites en clair. */
+function stageRulesHtml(etapes) {
+  return etapes
     .map(
       (st, i) => `<section class="panel" id="stage-${i}">
-        <h2>${cap(st.sorties[0])} <small>${esc(st.description)}</small></h2>
+        <h2>${esc(cmdName(st.sorties[0]))} <small>${esc(st.description)}</small></h2>
         <p class="chips">${st.entrees.map((n) => `<span class="chip" title="${esc(n)}">${esc(varLabel(n))}</span>`).join("")}
           <span class="muted">→</span> <span class="chip strong">${esc(st.sorties[0])}</span></p>
         <ol class="rules plain">${st.regles
@@ -721,8 +738,12 @@ async function renderRules() {
           .join("")}</ol></section>`,
     )
     .join("");
-  const names = [...new Set(kb.etapes.flatMap((st) => [...st.entrees, ...st.sorties]))].filter((n) => S.vars[n]);
-  const vars = names
+}
+
+/** Une carte par variable linguistique : ses termes et leurs fonctions d'appartenance. */
+function varCardsHtml(names) {
+  return names
+    .filter((n) => S.vars[n])
     .map((n) => {
       const v = S.vars[n];
       return `<article class="var-card"><h4>${esc(v.description || v.nom)}</h4>
@@ -733,10 +754,6 @@ async function renderRules() {
           .join("")}</div></article>`;
     })
     .join("");
-  $("#rules-body").innerHTML = `${flow}${stages}
-    <section class="panel"><h2>Vocabulaire <small>ce que signifient « élevé », « rapide », « jeune »…</small></h2>
-      <p class="muted small">Chaque courbe donne, pour une valeur mesurée, à quel degré (0 à 1) le mot s'applique. Survolez une courbe pour lire les degrés.</p>
-      <div class="var-grid">${vars}</div></section>`;
 }
 
 // ----------------------------------------------------------------- vue : sélection
@@ -795,10 +812,420 @@ function exportShortlist() {
   URL.revokeObjectURL(a.href);
 }
 
+// ----------------------------------------------------------------- vue : commande Scout
+//
+// Trois variables linguistiques (vitesse, accélération, tacle) sont chacune DÉDUITES de
+// trois mesures ; elles déterminent ensuite un niveau de 1 à 6. Chaque mesure peut être
+// saisie comme une valeur précise, un intervalle ou une catégorie.
+
+const OBS_TYPES = [
+  ["valeur", "Valeur"],
+  ["intervalle", "Intervalle"],
+  ["categorie", "Catégorie"],
+];
+const levelName = (term) => cap(String(term).replace("_", " "));
+const CMD_NAMES = { acceleration: "Accélération" };
+const cmdName = (name) => CMD_NAMES[name] || cap(name);
+const clampTo = (v, x) => Math.min(v.univers[1], Math.max(v.univers[0], x));
+
+/** Couleur d'un terme selon son rang dans sa variable (rampe ordinale à une teinte). */
+function termLevel(variable, label) {
+  const i = variable.termes.findIndex((t) => t.label === label);
+  return "lv" + Math.round((Math.max(0, i) / Math.max(1, variable.termes.length - 1)) * 3);
+}
+const termChip = (variable, label) =>
+  `<span class="chip"><i class="dot ${termLevel(variable, label)}"></i>${esc(label)}</span>`;
+
+/** Jauge à six crans : le niveau du joueur. */
+const steps = (level, total, cls = "") =>
+  `<span class="steps ${cls}" role="img" aria-label="Niveau ${level} sur ${total}">${Array.from(
+    { length: total },
+    (_, i) => `<i class="${i < level ? "on" : ""}"></i>`,
+  ).join("")}</span>`;
+
+function cmdDefaultObs(name) {
+  const v = S.vars[name];
+  const [lo, hi] = v.univers;
+  const mid = (lo + hi) / 2;
+  return {
+    type: "valeur",
+    valeur: mid,
+    min: mid - (hi - lo) * 0.08,
+    max: mid + (hi - lo) * 0.08,
+    terme: v.termes[Math.floor(v.termes.length / 2)].label,
+  };
+}
+
+function cmdReset() {
+  const c = S.cmd;
+  c.base = "";
+  c.degrees = {};
+  c.obs = Object.fromEntries(c.sys.entrees_requises.map((n) => [n, cmdDefaultObs(n)]));
+}
+
+async function cmdEnsure() {
+  const c = S.cmd;
+  if (c.sys) return;
+  c.sys = await api("/commande");
+  for (const v of c.sys.variables) S.vars[v.nom] = v;
+  cmdReset();
+}
+
+/** Reprend les observations d'un joueur du jeu de données (intervalles et catégories compris). */
+async function cmdLoadPlayer(id) {
+  const c = S.cmd;
+  const ev = await api("/commande/joueurs/" + encodeURIComponent(id));
+  cmdReset();
+  c.base = id;
+  for (const [name, ob] of Object.entries(ev.observations)) {
+    const o = c.obs[name];
+    const v = S.vars[name];
+    if (!o) continue;
+    const spread = (v.univers[1] - v.univers[0]) * 0.08;
+    if (ob.type === "intervalle") {
+      Object.assign(o, { type: "intervalle", min: ob.min, max: ob.max, valeur: (ob.min + ob.max) / 2 });
+    } else if (ob.type === "categorie") {
+      Object.assign(o, { type: "categorie", terme: ob.terme });
+    } else if (ob.type === "valeur") {
+      Object.assign(o, { type: "valeur", valeur: ob.valeur, min: clampTo(v, ob.valeur - spread), max: clampTo(v, ob.valeur + spread) });
+    }
+  }
+}
+
+function cmdObsText(name, o) {
+  const unit = esc(varUnit(name));
+  if (o.type === "intervalle") return `${fmtVal(name, o.min)} – ${fmtVal(name, o.max)} <small>${unit}</small>`;
+  if (o.type === "categorie") return `« ${esc(o.terme)} »`;
+  return `${fmtVal(name, o.valeur)} <small>${unit}</small>`;
+}
+
+function cmdChart(name, o) {
+  const v = S.vars[name];
+  if (o.type === "intervalle") return mfChart(v, null, { band: [o.min, o.max] });
+  if (o.type === "categorie") return mfChart(v, null, { term: o.terme });
+  return mfChart(v, o.valeur);
+}
+
+function cmdControl(name, o) {
+  const v = S.vars[name];
+  const [lo, hi] = v.univers;
+  const id = esc(name);
+  if (o.type === "intervalle") {
+    const num = (part, label) =>
+      `<label>${label} <input type="number" data-cmd="${id}" data-part="${part}" min="${lo}" max="${hi}" step="${stepOf(name)}" value="${+o[part].toFixed(3)}"></label>`;
+    return `<div class="pair">${num("min", "de")}${num("max", "à")}<small class="muted">${esc(v.unite)}</small></div>`;
+  }
+  if (o.type === "categorie") {
+    return `<div class="seg terms" role="group" aria-label="Catégorie">${v.termes
+      .map(
+        (t, i) =>
+          `<button data-act="cmd-term" data-name="${id}" data-term="${esc(t.label)}" aria-pressed="${t.label === o.terme}"><i class="swatch s${(i % 4) + 1}"></i>${esc(t.label)}</button>`,
+      )
+      .join("")}</div>`;
+  }
+  return `<input type="range" data-cmd="${id}" data-part="valeur" min="${lo}" max="${hi}" step="${stepOf(name)}" value="${o.valeur}" aria-label="${esc(varLabel(name))}">`;
+}
+
+function cmdRow(name) {
+  const o = S.cmd.obs[name];
+  const id = esc(name);
+  return `<div class="sim-row obs-row" id="cmdr-${id}">
+    <div class="obs-head"><span>${esc(varLabel(name))}</span><output id="cmdo-${id}">${cmdObsText(name, o)}</output></div>
+    <div class="obs-ctl">
+      <div class="seg" role="group" aria-label="Forme de l'observation">${OBS_TYPES.map(
+        ([type, label]) =>
+          `<button data-act="cmd-type" data-name="${id}" data-type="${type}" aria-pressed="${o.type === type}">${label}</button>`,
+      ).join("")}</div>
+      <div class="obs-input">${cmdControl(name, o)}</div>
+    </div>
+    <div id="cmdc-${id}">${cmdChart(name, o)}</div>
+    <div class="chips" id="cmdd-${id}">${degreeChips(S.vars[name], S.cmd.degrees[name] || null)}</div></div>`;
+}
+
+function cmdPayload() {
+  const out = {};
+  for (const [name, o] of Object.entries(S.cmd.obs)) {
+    out[name] = o.type === "intervalle" ? [o.min, o.max] : o.type === "categorie" ? o.terme : o.valeur;
+  }
+  return out;
+}
+
+/** Verdict : niveau, variables déduites, puis le raisonnement étape par étape. */
+function cmdResultHtml(ev, { inputs = false } = {}) {
+  const sys = S.cmd.sys;
+  const tiles = sys.variables_deduites
+    .map((name) => {
+      const d = ev.variables[name];
+      const v = S.vars[name];
+      return `<div class="tile"><span class="tile-label">${esc(cmdName(name))}</span>
+        <span class="tile-value">${nf(d.valeur, 0)}</span>${termChip(v, d.label)}
+        <span class="meter"><i class="${termLevel(v, d.label)}" style="width:${d.valeur}%"></i></span>
+        <span class="chips tile-deg">${degreeChipsText(d.degres)}</span></div>`;
+    })
+    .join("");
+  const stages = (ev.etapes || [])
+    .map((st, idx) => {
+      const out = Object.keys(st.sorties)[0];
+      const final = out === sys.sortie;
+      const observed = Object.entries(st.observations)
+        .map(([name, ob]) => {
+          const v = S.vars[name];
+          if (ob.type === "degres") {
+            return `<div class="in-row"><div class="in-head"><span>${esc(cmdName(name))}</span><b>conclusion floue</b></div>
+              <div class="chips">${degreeChipsText(ob.degres) || `<span class="muted small">aucune règle déclenchée</span>`}</div></div>`;
+          }
+          if (!inputs) return "";
+          const kind = ob.type === "intervalle" ? "intervalle" : ob.type === "categorie" ? "catégorie" : "";
+          return `<div class="in-row">
+            <div class="in-head"><span>${esc(varLabel(name))}${kind ? ` <em class="chip">${kind}</em>` : ""}</span><b>${cmdObsText(name, ob)}</b></div>
+            ${cmdChart(name, ob)}
+            <div class="chips">${degreeChips(v, st.entrees_floues[name])}</div></div>`;
+        })
+        .join("");
+      const shown = st.regles_declenchees.slice(0, 4);
+      const rules = shown.length
+        ? shown
+            .map(
+              (r) => `<li class="rule">
+              <div class="rule-force" title="Force d'activation de la règle"><b>${nf(r.force, 2)}</b>
+                <span class="meter"><i class="acc" style="width:${r.force * 100}%"></i></span></div>
+              <div><p class="rule-text"><span class="rule-id">${esc(r.id)}</span> ${fmtRule(r.regle)}</p></div></li>`,
+            )
+            .join("")
+        : `<li class="muted">Aucune règle déclenchée.</li>`;
+      const more = st.nb_regles_declenchees - shown.length;
+      const head = final
+        ? `<b>Niveau ${ev.niveau}</b>${steps(ev.niveau, sys.niveaux, "sm")}`
+        : `<b>${nf(ev.variables[out].valeur, 0)}</b>${termChip(S.vars[out], ev.variables[out].label)}`;
+      return `<details class="stage" ${final || (inputs && idx === 0) ? "open" : ""}>
+        <summary><span class="stage-name">${esc(cmdName(out))}</span><span class="stage-out">${head}</span></summary>
+        ${observed ? `<h4>${final ? "Ce que les étapes précédentes ont conclu" : "Ce qui a été observé"}</h4><div class="in-grid">${observed}</div>` : ""}
+        <h4>Règles déclenchées <small>${st.nb_regles_declenchees} sur ${st.nb_regles}</small></h4>
+        <ol class="rules">${rules}</ol>
+        ${more > 0 ? `<p class="muted small">+ ${more} règle(s) de moindre force non affichée(s).</p>` : ""}
+        <h4>Conclusion</h4>
+        <div class="chips">${degreeChipsText(st.conclusions[out], final ? levelName : undefined) || `<span class="muted small">aucune</span>`}</div>
+        ${st.avertissements.map((w) => `<p class="warn">${esc(w)}</p>`).join("")}
+      </details>`;
+    })
+    .join("");
+  return `<div class="hero">
+      <div><span class="hero-label">Niveau du joueur</span>
+        <div class="hero-num">${ev.niveau}<small>/${sys.niveaux}</small></div></div>
+      <div class="hero-side">${steps(ev.niveau, sys.niveaux)}
+        <span class="muted small">valeur défuzzifiée : ${nf(ev.niveau_valeur, 2)}</span></div>
+    </div>
+    <div class="tiles">${tiles}</div>
+    ${stages ? `<h3>Raisonnement</h3>
+      <p class="muted small">Chaque variable est déduite de ses trois mesures, puis transmise à la décision finale sous forme floue (le degré de chaque terme), sans être ramenée à un nombre entre les deux.</p>${stages}` : ""}`;
+}
+
+/** Degrés non nuls, en texte : « moyenne 0,25 · fort 0,33 ». */
+function degreeChipsText(degrees, rename = (t) => t) {
+  return Object.entries(degrees || {})
+    .filter(([, d]) => d > 0)
+    .map(([t, d]) => `<span class="chip">${esc(rename(t))} <b>${nf(d, 2)}</b></span>`)
+    .join("");
+}
+
+async function renderCmd() {
+  const view = $("#view");
+  const c = S.cmd;
+  try {
+    await cmdEnsure();
+  } catch (err) {
+    view.innerHTML = `<div class="empty panel"><strong>Système de commande indisponible.</strong><p>${esc(err.message)}</p></div>`;
+    return;
+  }
+  if (currentRoute() !== "commande") return;
+  const modes = [
+    ["joueur", "Un joueur", "cas 1"],
+    ["poste", "Joueurs d'un même poste", "cas 2"],
+    ["regles", "Règles du système", ""],
+  ];
+  view.innerHTML = `
+    <section class="page-head"><h1>Système de commande Scout</h1>
+      <p>La <b>vitesse</b>, l'<b>accélération</b> et le <b>tacle</b> ne sont pas saisis : chacun est déduit de trois mesures, précises ou floues (un intervalle, une catégorie). Les trois déterminent ensuite un <b>niveau de 1 à ${c.sys.niveaux}</b>.</p>
+      <div class="seg modes" role="group" aria-label="Cas d'utilisation">${modes
+        .map(
+          ([mode, label, hint]) =>
+            `<button data-act="cmd-mode" data-mode="${mode}" aria-pressed="${c.mode === mode}">${label}${hint ? ` <small>${hint}</small>` : ""}</button>`,
+        )
+        .join("")}</div>
+    </section>
+    <div id="cmd-body"></div>`;
+  if (c.mode === "poste") return renderCmdRanking();
+  if (c.mode === "regles") return renderCmdRules();
+  const stages = c.sys.etapes.filter((st) => st.sorties[0] !== c.sys.sortie);
+  $("#cmd-body").innerHTML = `
+    <div class="toolbar panel">
+      <label class="field"><span>Partir d'un joueur du jeu de données</span><select id="cmd-base"><option value="">Aucun (saisie libre)</option>${S.players
+        .map((p) => `<option value="${esc(p.id)}" ${p.id === c.base ? "selected" : ""}>${esc(p.nom)} — ${esc(posLabel(p.poste))}</option>`)
+        .join("")}</select></label>
+      <button class="btn" data-act="cmd-reset">Réinitialiser</button>
+      <p class="muted small grow">Pour chaque mesure, choisissez sa forme : une <b>valeur</b> précise, un <b>intervalle</b> (la mesure est quelque part entre deux bornes) ou une <b>catégorie</b> (un simple jugement).</p>
+    </div>
+    <div class="split sim">
+      <div class="sim-inputs">${stages
+        .map(
+          (st) => `<section class="panel sim-group"><h2>${esc(cmdName(st.sorties[0]))} <small>à déduire de ${st.entrees.length} mesures</small></h2>
+            ${st.entrees.map(cmdRow).join("")}</section>`,
+        )
+        .join("")}</div>
+      <section class="panel sim-result" aria-live="polite"><div id="cmd-out"><p class="loading">Évaluation…</p></div></section>
+    </div>`;
+  evalCmd();
+}
+
+let cmdSeq = 0;
+async function evalCmd() {
+  const c = S.cmd;
+  const seq = ++cmdSeq;
+  const player = S.byId[c.base];
+  let ev = null;
+  let error = "";
+  try {
+    ev = await api("/commande/evaluations", {
+      observations: cmdPayload(),
+      name: player ? `${player.nom} (modifiable)` : "Joueur observé",
+      trace: true,
+    });
+  } catch (err) {
+    error = err.message;
+  }
+  if (seq !== cmdSeq) return;
+  const out = $("#cmd-out");
+  if (!out) return;
+  if (error) {
+    out.innerHTML = `<p class="error">${esc(error)}</p>`;
+    return;
+  }
+  for (const st of ev.etapes) {
+    for (const [name, degrees] of Object.entries(st.entrees_floues)) {
+      if (!(name in c.obs)) continue;
+      c.degrees[name] = degrees;
+      const el = document.getElementById("cmdd-" + name);
+      if (el) el.innerHTML = degreeChips(S.vars[name], degrees);
+    }
+  }
+  const openState = [...out.querySelectorAll("details.stage")].map((d) => d.open);
+  out.innerHTML = `<p class="muted small">${esc(ev.joueur.nom)}</p>${cmdResultHtml(ev)}
+    ${ev.avertissements.map((w) => `<p class="warn">${esc(w)}</p>`).join("")}`;
+  if (openState.length) out.querySelectorAll("details.stage").forEach((d, i) => (d.open = openState[i] ?? d.open));
+}
+const evalCmdSoon = debounce(evalCmd, 90);
+
+async function renderCmdRanking() {
+  const c = S.cmd;
+  const body = $("#cmd-body");
+  body.innerHTML = `
+    <div class="toolbar panel">
+      <label class="field"><span>Poste</span><select id="cmd-pos"><option value="">Tous les postes</option>${S.positions
+        .map((p) => `<option value="${esc(p.code)}" ${p.code === c.pos ? "selected" : ""}>${esc(p.libelle)}</option>`)
+        .join("")}</select></label>
+      <p class="muted small grow">Les joueurs du poste sont évalués par les mêmes règles, à partir des observations du jeu de données — dont certaines sont des intervalles ou des catégories. Cliquez sur un joueur pour voir le raisonnement.</p>
+    </div>
+    <section class="panel" aria-live="polite"><div id="cmd-rank"><p class="loading">Calcul des niveaux…</p></div></section>`;
+  const pos = c.pos;
+  let r;
+  try {
+    r = await api("/commande/classements", { position: pos || null });
+  } catch (err) {
+    if ($("#cmd-rank")) $("#cmd-rank").innerHTML = `<p class="error">${esc(err.message)}</p>`;
+    return;
+  }
+  const box = $("#cmd-rank");
+  if (!box || pos !== c.pos) return;
+  c.report = r;
+  const deduced = c.sys.variables_deduites;
+  const rows = r.classement
+    .map((e) => {
+      const p = e.joueur;
+      const fuzzy = Object.values(e.observations).filter((o) => o.type !== "valeur").length;
+      return `<tr data-act="cmd-open" data-id="${esc(p.id)}" tabindex="0">
+        <td class="rk">${e.rang}</td>
+        <td><strong>${esc(p.nom)}</strong><span class="meta">${playerMeta(p)}</span></td>
+        <td class="apt"><b>Niveau ${e.niveau}</b><span class="muted small">${nf(e.niveau_valeur, 2)}</span>${steps(e.niveau, c.sys.niveaux, "row")}</td>
+        ${deduced
+          .map((n) => {
+            const d = e.variables[n];
+            return `<td class="ded"><span>${nf(d.valeur, 0)}</span> <span class="muted small">${esc(d.label)}</span>
+              <span class="meter"><i class="${termLevel(S.vars[n], d.label)}" style="width:${d.valeur}%"></i></span></td>`;
+          })
+          .join("")}
+        <td class="num">${fuzzy ? `<span class="chip" title="Observations saisies comme intervalle ou catégorie">${fuzzy} floue${fuzzy > 1 ? "s" : ""}</span>` : `<span class="muted small">précises</span>`}</td></tr>`;
+    })
+    .join("");
+  const skipped = r.exclus.length
+    ? `<details class="skipped"><summary>${r.exclus.length} joueur(s) non évalué(s) — voir pourquoi</summary><ul>${r.exclus
+        .map((s) => `<li><b>${esc(s.nom)}</b> <span class="muted">${esc(s.raison)}</span></li>`)
+        .join("")}</ul></details>`
+    : "";
+  box.innerHTML = `<div class="panel-head"><div><h2>${esc(r.poste ? r.poste.libelle : "Tous les postes")}</h2>
+      <p class="muted"><b>${r.classes}</b> joueur(s) évalué(s) sur ${r.candidats}</p></div></div>
+    ${
+      rows
+        ? `<div class="table-wrap"><table class="rank"><thead><tr><th>#</th><th>Joueur</th><th>Niveau</th>
+            ${deduced.map((n) => `<th>${esc(cmdName(n))}</th>`).join("")}<th class="num">Observations</th></tr></thead>
+            <tbody>${rows}</tbody></table></div>`
+        : `<div class="empty"><strong>Aucun joueur évaluable à ce poste.</strong></div>`
+    }${skipped}`;
+}
+
+function renderCmdRules() {
+  const sys = S.cmd.sys;
+  const names = [...new Set(sys.etapes.flatMap((st) => [...st.entrees, ...st.sorties]))].filter((n) => n !== sys.sortie);
+  $("#cmd-body").innerHTML = `
+    <ol class="flow fan" aria-label="Trois déductions en parallèle, puis la décision">${sys.etapes
+      .map(
+        (st, i) => `<li><a href="#stage-${i}"><strong>${esc(cmdName(st.sorties[0]))}</strong>
+          <span>${st.entrees.length} entrée(s) · ${st.regles.length} règles</span></a></li>`,
+      )
+      .join("")}</ol>
+    <section class="panel"><h2>Barème des règles</h2>
+      <p class="muted">Chaque étape couvre les 27 combinaisons de ses trois entrées. Une entrée favorable vaut 2 points, intermédiaire 1 point, défavorable 0 point.</p>
+      <div class="table-wrap"><table class="stats"><thead><tr><th>Total des points</th><th>Variable déduite (vitesse, accélération, tacle)</th><th>Niveau (décision finale)</th></tr></thead><tbody>
+        <tr><td>6</td><td>fort</td><td><b>Niveau 6</b> — uniquement fort, fort, fort</td></tr>
+        <tr><td>5</td><td>fort</td><td>Niveau 5</td></tr>
+        <tr><td>4</td><td>fort</td><td>Niveau 4</td></tr>
+        <tr><td>3</td><td>moyenne</td><td>Niveau 3</td></tr>
+        <tr><td>1 ou 2</td><td>faible</td><td>Niveau 2</td></tr>
+        <tr><td>0</td><td>faible</td><td>Niveau 1</td></tr></tbody></table></div></section>
+    ${stageRulesHtml(sys.etapes)}
+    <section class="panel"><h2>Vocabulaire <small>ce que signifient « court », « élevé », « fort »…</small></h2>
+      <p class="muted small">Chaque courbe donne, pour une valeur, à quel degré (0 à 1) le mot s'applique. Le niveau, lui, est porté par six triangles centrés sur 1, 2, … 6.</p>
+      <div class="var-grid">${varCardsHtml(names)}</div></section>`;
+}
+
+/** Fiche d'un joueur du classement : ses observations et le raisonnement complet. */
+async function openCmdSheet(id) {
+  const sheet = $("#sheet");
+  const p = S.byId[id];
+  if (!p) return;
+  S.sheet = { id, position: "commande" };
+  sheet.innerHTML = `<div class="sheet-in">
+    <header class="sheet-head">
+      <div><h2>${esc(p.nom)}</h2><p class="muted">${playerMeta(p)} · ${esc(p.id)}</p></div>
+      <button class="icon" data-act="close" aria-label="Fermer la fiche">✕</button>
+    </header>
+    <div class="sheet-bar solo"><div class="btns"><button class="btn" data-act="cmd-edit" data-id="${esc(id)}">Modifier ses observations</button></div></div>
+    <div id="sheet-body"><p class="loading">Évaluation…</p></div></div>`;
+  if (!sheet.open) sheet.showModal();
+  let html;
+  try {
+    const ev = await api("/commande/joueurs/" + encodeURIComponent(id));
+    html = cmdResultHtml(ev, { inputs: true }) + ev.avertissements.map((w) => `<p class="warn">${esc(w)}</p>`).join("");
+  } catch (err) {
+    html = `<div class="empty"><strong>Évaluation impossible.</strong><p>${esc(err.message)}</p></div>`;
+  }
+  if (S.sheet.id === id && S.sheet.position === "commande") $("#sheet-body").innerHTML = html;
+}
+
 // ----------------------------------------------------------------- navigation et événements
 
 const ROUTES = {
   recherche: renderSearch,
+  commande: renderCmd,
   comparer: renderCompare,
   simulateur: renderSim,
   regles: renderRules,
@@ -884,15 +1311,39 @@ document.addEventListener("click", (e) => {
     renderSim();
   } else if (act === "export") {
     exportShortlist();
+  } else if (act === "cmd-mode") {
+    S.cmd.mode = el.dataset.mode;
+    renderCmd();
+  } else if (act === "cmd-type" || act === "cmd-term") {
+    const name = el.dataset.name;
+    const o = S.cmd.obs[name];
+    if (act === "cmd-type") o.type = el.dataset.type;
+    else o.terme = el.dataset.term;
+    document.getElementById("cmdr-" + name).outerHTML = cmdRow(name);
+    evalCmd();
+  } else if (act === "cmd-reset") {
+    cmdReset();
+    renderCmd();
+  } else if (act === "cmd-open") {
+    openCmdSheet(id);
+  } else if (act === "cmd-edit") {
+    sheet.close();
+    cmdLoadPlayer(id)
+      .then(() => {
+        S.cmd.mode = "joueur";
+        renderCmd();
+      })
+      .catch((err) => toast(err.message));
   }
 });
 
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Enter" && e.key !== " ") return;
-  const row = e.target.matches && e.target.matches("tr[data-act=open]") ? e.target : null;
+  const row = e.target.matches && e.target.matches("tr[data-act=open], tr[data-act=cmd-open]") ? e.target : null;
   if (!row) return;
   e.preventDefault();
-  openSheet(row.dataset.id, row.dataset.pos);
+  if (row.dataset.act === "cmd-open") openCmdSheet(row.dataset.id);
+  else openSheet(row.dataset.id, row.dataset.pos);
 });
 
 document.addEventListener("input", (e) => {
@@ -904,6 +1355,16 @@ document.addEventListener("input", (e) => {
     document.getElementById("simo-" + name).innerHTML =
       `${fmtVal(name, S.sim.values[name])} <small>${esc(varUnit(name))}</small>`;
     return evalSimSoon();
+  }
+  if (t.dataset.cmd) {
+    const name = t.dataset.cmd;
+    const value = Number(t.value);
+    if (t.value === "" || Number.isNaN(value)) return;
+    const o = S.cmd.obs[name];
+    o[t.dataset.part] = value;
+    document.getElementById("cmdo-" + name).innerHTML = cmdObsText(name, o);
+    document.getElementById("cmdc-" + name).innerHTML = cmdChart(name, o);
+    return evalCmdSoon();
   }
   if (t.id === "f-value") f.maxValue = Number(t.value) >= S.valueMax ? null : Number(t.value);
   else if (t.id === "f-age") f.maxAge = Number(t.value);
@@ -939,6 +1400,17 @@ document.addEventListener("change", (e) => {
     if (!t.value) S.sim.values = {};
     simInit(S.sim.position, t.value);
     renderSim();
+  } else if (t.id === "cmd-pos") {
+    S.cmd.pos = t.value;
+    renderCmdRanking();
+  } else if (t.id === "cmd-base") {
+    if (!t.value) {
+      cmdReset();
+      return renderCmd();
+    }
+    cmdLoadPlayer(t.value)
+      .catch((err) => toast(err.message))
+      .then(renderCmd);
   } else if (t.id === "rules-pos") {
     S.rulesPos = t.value;
     renderRules();

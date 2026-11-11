@@ -5,6 +5,14 @@ system needs up to *kⁿ* rules, whereas a hierarchy of small systems grows
 linearly. The outputs of a stage become inputs of the next ones, exactly like a
 proof ``E1, E2, …, En`` where each step may use the theorems established before
 (course, *Systèmes formels*).
+
+Two ways of handing a conclusion to the next stage (``chaining``):
+
+* ``"crisp"`` — the conclusion is defuzzified and the number is fuzzified again by
+  the next stage (simple, but the shape of the conclusion is lost);
+* ``"fuzzy"`` — the next stage receives the conclusion itself, i.e. the degree of
+  each term (``vitesse : fort 0.7, moyenne 0.3``). Nothing is lost in between; the
+  defuzzified number is still computed, for display only.
 """
 
 from __future__ import annotations
@@ -13,7 +21,10 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 
 from fuzzyengine.exceptions import DefinitionError
+from fuzzyengine.observations import Degrees, Observation
 from fuzzyengine.system import EvaluationResult, FuzzySystem
+
+CHAININGS = ("crisp", "fuzzy")
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,8 +52,14 @@ class FuzzyPipeline:
     name: str
     stages: tuple[FuzzySystem, ...]
     description: str = ""
+    chaining: str = "crisp"
 
     def __post_init__(self) -> None:
+        if self.chaining not in CHAININGS:
+            raise DefinitionError(
+                f"Pipeline '{self.name}' : chaînage inconnu '{self.chaining}' "
+                f"(attendu : {' ou '.join(CHAININGS)})."
+            )
         if not self.stages:
             raise DefinitionError(f"Le pipeline '{self.name}' doit avoir au moins une étape.")
         produced: set[str] = set()
@@ -91,8 +108,8 @@ class FuzzyPipeline:
     def final_outputs(self) -> tuple[str, ...]:
         return tuple(self.stages[-1].outputs)
 
-    def evaluate(self, values: Mapping[str, float]) -> PipelineResult:
-        context: dict[str, float] = dict(values)
+    def evaluate(self, values: Mapping[str, Observation]) -> PipelineResult:
+        context: dict[str, Observation] = dict(values)
         results: list[EvaluationResult] = []
         outputs: dict[str, float] = {}
         labels: dict[str, str] = {}
@@ -100,7 +117,15 @@ class FuzzyPipeline:
             result = stage.evaluate(context)
             results.append(result)
             for name, value in result.outputs.items():
-                context[name] = value
+                context[name] = self._handed_over(result, name)
                 outputs[name] = value
                 labels[name] = result.label(name)
         return PipelineResult(self.name, tuple(results), outputs, labels)
+
+    def _handed_over(self, result: EvaluationResult, name: str) -> Observation:
+        """What the following stages receive for the output ``name`` of ``result``."""
+        conclusion = result.conclusions[name]
+        if self.chaining == "fuzzy" and any(degree > 0.0 for degree in conclusion.values()):
+            return Degrees(conclusion)
+        # Crisp chaining, or no rule fired (the stage fell back to a default number).
+        return result.outputs[name]

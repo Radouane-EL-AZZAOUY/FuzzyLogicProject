@@ -16,3 +16,7 @@ def default_knowledge_dir() -> Path:
 
 def default_players_csv() -> Path:
     return package_root() / "data" / "joueurs_exemple.csv"
+
+
+def default_observations_csv() -> Path:
+    return package_root() / "data" / "observations_commande.csv"

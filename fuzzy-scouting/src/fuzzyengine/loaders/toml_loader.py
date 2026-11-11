@@ -236,10 +236,16 @@ def load_pipeline(
     paths: Iterable[str | Path],
     description: str = "",
     library: Library | None = None,
+    chaining: str = "crisp",
 ) -> FuzzyPipeline:
-    """Chain the systems read from ``paths`` (in order) into a pipeline."""
+    """Chain the systems read from ``paths`` (in order) into a pipeline.
+
+    ``chaining`` is ``"crisp"`` or ``"fuzzy"`` (see :mod:`fuzzyengine.pipeline`).
+    """
     try:
-        return FuzzyPipeline(name, tuple(load_system(p, library) for p in paths), description)
+        return FuzzyPipeline(
+            name, tuple(load_system(p, library) for p in paths), description, chaining
+        )
     except KnowledgeBaseError:
         raise
     except FuzzyEngineError as exc:

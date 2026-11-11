@@ -7,6 +7,8 @@ Public API (stable):
 * logic       : :class:`Atom`, :class:`Not`, :class:`And`, :class:`Or`, :class:`Rule`,
   :class:`RuleBase`, operator families (``ZADEH``, ``PROBABILISTIC``, ``LUKASIEWICZ``);
 * execution   : :class:`FuzzySystem`, :class:`FuzzySystemBuilder`, :class:`FuzzyPipeline`;
+* observations: precise numbers, :class:`Interval`, :class:`Category`, :class:`Degrees`,
+  :func:`parse_observation`;
 * text        : :func:`parse_rule`, :func:`parse_formula`, :func:`load_system`,
   :func:`load_pipeline`, :func:`explain_result`, :func:`explain_pipeline`.
 """
@@ -41,6 +43,7 @@ from fuzzyengine.membership import (
     Triangular,
     membership_from_spec,
 )
+from fuzzyengine.observations import Category, Degrees, Interval, Observation, parse_observation
 from fuzzyengine.operators import LUKASIEWICZ, PROBABILISTIC, ZADEH, FuzzyOperators
 from fuzzyengine.pipeline import FuzzyPipeline, PipelineResult
 from fuzzyengine.rules import Consequent, Rule, RuleBase
@@ -59,10 +62,12 @@ __all__ = [
     "And",
     "Atom",
     "Bisector",
+    "Category",
     "Centroid",
     "Consequent",
     "DefinitionError",
     "Defuzzifier",
+    "Degrees",
     "EvaluationError",
     "EvaluationResult",
     "Formula",
@@ -75,12 +80,14 @@ __all__ = [
     "Gaussian",
     "InferenceMethod",
     "Interpretation",
+    "Interval",
     "KnowledgeBaseError",
     "LinguisticVariable",
     "MamdaniInference",
     "MeanOfMaximum",
     "MembershipFunction",
     "Not",
+    "Observation",
     "Or",
     "ParseError",
     "PipelineResult",
@@ -103,5 +110,6 @@ __all__ = [
     "load_system_from_dict",
     "membership_from_spec",
     "parse_formula",
+    "parse_observation",
     "parse_rule",
 ]

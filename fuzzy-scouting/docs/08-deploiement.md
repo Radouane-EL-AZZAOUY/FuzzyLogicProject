@@ -3,7 +3,7 @@
 ## 8.1 Interface en ligne de commande
 
 ```
-fuzzyscout [--players CSV] [--knowledge-dir DIR] [--log-level LEVEL] <commande> [options]
+fuzzyscout [--players CSV] [--observations CSV] [--knowledge-dir DIR] [--log-level LEVEL] <commande> [options]
 ```
 
 | Commande | Options | Description |
@@ -11,6 +11,7 @@ fuzzyscout [--players CSV] [--knowledge-dir DIR] [--log-level LEVEL] <commande> 
 | `positions` | — | Liste les postes évaluables |
 | `rank` | `--position CODE` (requis), `--top N`, `--max-age`, `--max-value` (M€), `--min-minutes`, `--nationality`, `--natural-only`, `--explain`, `--json` | Classe les joueurs du CSV pour un poste |
 | `evaluate` | `--position CODE`, `--player ID` **ou** `--attr nom=valeur` (répétable) + `--name`, `--explain`, `--json` | Évalue un joueur du CSV ou un candidat ad hoc |
+| `level` | `--player ID` **ou** `--obs nom=observation` (répétable) + `--name` **ou** `--position CODE` + `--top N` ; `--explain`, `--json` | Système de commande Scout : niveau (1 à 6) d'un joueur, ou classement des joueurs d'un poste. Une observation est une valeur (`4.1`), un intervalle (`4.0..4.3`) ou une catégorie (`court`). Voir [10](10-commande-scout.md) |
 | `validate` | — | Charge et valide toutes les bases de connaissances |
 | `serve` | `--host`, `--port`, `--reload` | Démarre l'interface web et l'API HTTP (extra `[api]`) |
 
@@ -38,6 +39,10 @@ sous `/ui/`) ; elle n'utilise que les routes ci-dessous.
 | GET | `/knowledge` | — | résumé validé des bases (étapes, règles, entrées requises) |
 | GET | `/knowledge/{poste}` | — | règles complètes d'un poste, étape par étape (texte, description, poids ; 404 si inconnu) |
 | GET | `/variables` | — | variables linguistiques : univers, unité, termes et courbe d'appartenance échantillonnée |
+| GET | `/commande` | — | système de commande Scout : étapes, règles, variables (404 si le dossier `commande/` est absent des bases) |
+| POST | `/commande/evaluations` | `{"observations": {...}, "name"?, "trace"?}` | niveau d'un joueur décrit par des observations précises ou floues (422 si une observation est inutilisable ou manquante) |
+| GET | `/commande/joueurs/{id}` | — | niveau d'un joueur du référentiel, avec le raisonnement |
+| POST | `/commande/classements` | `{"position"?, "limit"?}` | joueurs d'un poste classés par niveau |
 | POST | `/evaluations` | `{position, player_id, trace?}` | évaluation (404 joueur/poste inconnu, 422 statistiques manquantes) |
 | POST | `/evaluations/ad-hoc` | `{position, attributes{…}, name?, trace?}` | évaluation d'un candidat transitoire |
 | POST | `/rankings` | `{position, limit?, max_age?, max_market_value?, min_minutes?, natural_position_only?, nationality?, trace?}` | classement + exclus |
@@ -83,6 +88,7 @@ threads de FastAPI : l'inférence (CPU) ne bloque jamais la boucle d'événement
 | Variable d'environnement | Rôle | Défaut |
 |---|---|---|
 | `FUZZYSCOUT_PLAYERS_CSV` | fichier des joueurs | jeu d'exemple embarqué |
+| `FUZZYSCOUT_OBSERVATIONS_CSV` | observations du système de commande Scout (une ligne par joueur) | observations d'exemple, si le fichier des joueurs est celui d'exemple ; aucune sinon |
 | `FUZZYSCOUT_KNOWLEDGE_DIR` | répertoire des bases (doit contenir `variables.toml`, `positions.toml` et les sous-dossiers) | bases embarquées |
 | `FUZZYSCOUT_LOG_LEVEL` | `DEBUG`, `INFO`, `WARNING`, `ERROR` | `INFO` |
 

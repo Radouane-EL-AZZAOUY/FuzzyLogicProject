@@ -21,9 +21,10 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from fuzzyengine import FuzzyEngineError
+from fuzzyengine import EvaluationError, FuzzyEngineError, parse_observation
 from fuzzyscout import __version__
 from fuzzyscout.application.rank_players import RankingRequest
+from fuzzyscout.application.scout_command import ScoutCommand
 from fuzzyscout.application.scouting_service import ScoutingService
 from fuzzyscout.bootstrap import build_service
 from fuzzyscout.config import Settings
@@ -50,8 +51,25 @@ def get_service(request: Request) -> ScoutingService:
 Service = Annotated[ScoutingService, Depends(get_service)]
 
 
+class CommandUnavailableError(ScoutingError):
+    def __init__(self) -> None:
+        super().__init__(
+            "Le système de commande Scout n'est pas disponible : le répertoire des bases de "
+            "connaissances ne contient pas de dossier « commande »."
+        )
+
+
+def get_command(svc: Service) -> ScoutCommand:
+    if svc.command is None:
+        raise CommandUnavailableError
+    return svc.command
+
+
+Command = Annotated[ScoutCommand, Depends(get_command)]
+
+
 def _status_for(exc: ScoutingError) -> int:
-    if isinstance(exc, PlayerNotFoundError | PositionNotFoundError):
+    if isinstance(exc, PlayerNotFoundError | PositionNotFoundError | CommandUnavailableError):
         return 404
     if isinstance(exc, MissingAttributesError):
         return 422
@@ -77,6 +95,8 @@ def create_app(
     if warm_up:
         app.state.service.validate_knowledge()
         app.state.service.players()
+        if app.state.service.command is not None:
+            _ = app.state.service.command.pipeline
 
     @app.exception_handler(ScoutingError)
     def scouting_error_handler(_: Request, exc: ScoutingError) -> JSONResponse:
@@ -85,6 +105,11 @@ def create_app(
     @app.exception_handler(ValueError)
     def value_error_handler(_: Request, exc: ValueError) -> JSONResponse:
         # Domain invariants (blank name, non-finite attribute...) are client errors.
+        return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+    @app.exception_handler(EvaluationError)
+    def evaluation_error_handler(_: Request, exc: EvaluationError) -> JSONResponse:
+        # Unusable input (unknown category, inverted interval, non-numeric value...).
         return JSONResponse(status_code=422, content={"detail": str(exc)})
 
     @app.exception_handler(FuzzyEngineError)
@@ -197,6 +222,63 @@ def create_app(
         report = svc.rank(request)
         return schemas.as_model(
             schemas.RankingOut, presenters.ranking_to_dict(report, include_trace=body.trace)
+        )
+
+    @app.get(
+        "/commande",
+        response_model=schemas.CommandOut,
+        responses={404: {"model": schemas.ErrorOut}},
+        tags=["commande Scout"],
+    )
+    def command_system(command: Command) -> schemas.CommandOut:
+        """Le système : étapes de déduction, règles lisibles et variables linguistiques."""
+        return schemas.as_model(schemas.CommandOut, presenters.command_to_dict(command.pipeline))
+
+    @app.post(
+        "/commande/evaluations",
+        response_model=schemas.CommandEvaluationOut,
+        responses={404: {"model": schemas.ErrorOut}, 422: {"model": schemas.ErrorOut}},
+        tags=["commande Scout"],
+    )
+    def command_evaluate(
+        body: schemas.CommandEvaluationRequest, command: Command
+    ) -> schemas.CommandEvaluationOut:
+        """Cas 1 : un seul joueur, décrit par des observations précises ou floues."""
+        observations = {name: parse_observation(raw) for name, raw in body.observations.items()}
+        evaluation = command.evaluate_observations(observations, body.name)
+        return schemas.as_model(
+            schemas.CommandEvaluationOut,
+            presenters.command_evaluation_to_dict(evaluation, include_trace=body.trace),
+        )
+
+    @app.get(
+        "/commande/joueurs/{player_id}",
+        response_model=schemas.CommandEvaluationOut,
+        responses={404: {"model": schemas.ErrorOut}, 422: {"model": schemas.ErrorOut}},
+        tags=["commande Scout"],
+    )
+    def command_player(player_id: str, command: Command) -> schemas.CommandEvaluationOut:
+        """Cas 1 : un joueur du jeu de données, avec le détail du raisonnement."""
+        return schemas.as_model(
+            schemas.CommandEvaluationOut,
+            presenters.command_evaluation_to_dict(
+                command.evaluate_player(player_id), include_trace=True
+            ),
+        )
+
+    @app.post(
+        "/commande/classements",
+        response_model=schemas.CommandRankingOut,
+        responses={404: {"model": schemas.ErrorOut}},
+        tags=["commande Scout"],
+    )
+    def command_rank(
+        body: schemas.CommandRankingRequest, command: Command
+    ) -> schemas.CommandRankingOut:
+        """Cas 2 : les joueurs d'un même poste, classés par niveau."""
+        report = command.rank(body.position or None, body.limit)
+        return schemas.as_model(
+            schemas.CommandRankingOut, presenters.command_ranking_to_dict(report)
         )
 
     return app
