@@ -1,0 +1,128 @@
+# Niveau du joueur : décision finale à partir des trois variables linguistiques déduites.
+#
+# Barème : fort = 2 points, moyenne = 1 point, faible = 0 point. Les 27 combinaisons
+# sont couvertes ; seule la combinaison fort-fort-fort atteint le niveau 6.
+#   total 6 -> niveau 6 | 5 -> niveau 5 | 4 -> niveau 4 | 3 -> niveau 3
+#   total 1 ou 2 -> niveau 2 | total 0 -> niveau 1
+
+[system]
+name = "commande_niveau"
+description = "Niveau du joueur à partir de sa vitesse, de son accélération et de son tacle"
+
+[[inputs]]
+ref = "vitesse"
+[[inputs]]
+ref = "acceleration"
+[[inputs]]
+ref = "tacle"
+
+[[outputs]]
+ref = "niveau"
+
+[[rules]]
+id = "N1"
+text = "SI vitesse EST fort ET acceleration EST fort ET tacle EST fort ALORS niveau EST niveau_6"
+
+[[rules]]
+id = "N2"
+text = "SI vitesse EST fort ET acceleration EST fort ET tacle EST moyenne ALORS niveau EST niveau_5"
+
+[[rules]]
+id = "N3"
+text = "SI vitesse EST fort ET acceleration EST fort ET tacle EST faible ALORS niveau EST niveau_4"
+
+[[rules]]
+id = "N4"
+text = "SI vitesse EST fort ET acceleration EST moyenne ET tacle EST fort ALORS niveau EST niveau_5"
+
+[[rules]]
+id = "N5"
+text = "SI vitesse EST fort ET acceleration EST moyenne ET tacle EST moyenne ALORS niveau EST niveau_4"
+
+[[rules]]
+id = "N6"
+text = "SI vitesse EST fort ET acceleration EST moyenne ET tacle EST faible ALORS niveau EST niveau_3"
+
+[[rules]]
+id = "N7"
+text = "SI vitesse EST fort ET acceleration EST faible ET tacle EST fort ALORS niveau EST niveau_4"
+
+[[rules]]
+id = "N8"
+text = "SI vitesse EST fort ET acceleration EST faible ET tacle EST moyenne ALORS niveau EST niveau_3"
+
+[[rules]]
+id = "N9"
+text = "SI vitesse EST fort ET acceleration EST faible ET tacle EST faible ALORS niveau EST niveau_2"
+
+[[rules]]
+id = "N10"
+text = "SI vitesse EST moyenne ET acceleration EST fort ET tacle EST fort ALORS niveau EST niveau_5"
+
+[[rules]]
+id = "N11"
+text = "SI vitesse EST moyenne ET acceleration EST fort ET tacle EST moyenne ALORS niveau EST niveau_4"
+
+[[rules]]
+id = "N12"
+text = "SI vitesse EST moyenne ET acceleration EST fort ET tacle EST faible ALORS niveau EST niveau_3"
+
+[[rules]]
+id = "N13"
+text = "SI vitesse EST moyenne ET acceleration EST moyenne ET tacle EST fort ALORS niveau EST niveau_4"
+
+[[rules]]
+id = "N14"
+text = "SI vitesse EST moyenne ET acceleration EST moyenne ET tacle EST moyenne ALORS niveau EST niveau_3"
+
+[[rules]]
+id = "N15"
+text = "SI vitesse EST moyenne ET acceleration EST moyenne ET tacle EST faible ALORS niveau EST niveau_2"
+
+[[rules]]
+id = "N16"
+text = "SI vitesse EST moyenne ET acceleration EST faible ET tacle EST fort ALORS niveau EST niveau_3"
+
+[[rules]]
+id = "N17"
+text = "SI vitesse EST moyenne ET acceleration EST faible ET tacle EST moyenne ALORS niveau EST niveau_2"
+
+[[rules]]
+id = "N18"
+text = "SI vitesse EST moyenne ET acceleration EST faible ET tacle EST faible ALORS niveau EST niveau_2"
+
+[[rules]]
+id = "N19"
+text = "SI vitesse EST faible ET acceleration EST fort ET tacle EST fort ALORS niveau EST niveau_4"
+
+[[rules]]
+id = "N20"
+text = "SI vitesse EST faible ET acceleration EST fort ET tacle EST moyenne ALORS niveau EST niveau_3"
+
+[[rules]]
+id = "N21"
+text = "SI vitesse EST faible ET acceleration EST fort ET tacle EST faible ALORS niveau EST niveau_2"
+
+[[rules]]
+id = "N22"
+text = "SI vitesse EST faible ET acceleration EST moyenne ET tacle EST fort ALORS niveau EST niveau_3"
+
+[[rules]]
+id = "N23"
+text = "SI vitesse EST faible ET acceleration EST moyenne ET tacle EST moyenne ALORS niveau EST niveau_2"
+
+[[rules]]
+id = "N24"
+text = "SI vitesse EST faible ET acceleration EST moyenne ET tacle EST faible ALORS niveau EST niveau_2"
+
+[[rules]]
+id = "N25"
+text = "SI vitesse EST faible ET acceleration EST faible ET tacle EST fort ALORS niveau EST niveau_2"
+
+[[rules]]
+id = "N26"
+text = "SI vitesse EST faible ET acceleration EST faible ET tacle EST moyenne ALORS niveau EST niveau_2"
+
+[[rules]]
+id = "N27"
+text = "SI vitesse EST faible ET acceleration EST faible ET tacle EST faible ALORS niveau EST niveau_1"

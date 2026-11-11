@@ -37,7 +37,9 @@ temporaires passent par `tmp_path`.
 | `engine/test_robustness.py` | Singleton hors grille **signalé** (pas de valeur par défaut silencieuse), entrées non finies / non numériques, paramètres de forme non numériques, **pipeline mal ordonné refusé** | 11 |
 | `scouting/test_robustness.py` | Cellules CSV `nan`/`inf` rejetées avec ligne et colonne, **repli Windows-1252**, répertoire au lieu de fichier, invariants `Player`, filtre de poste insensible à la casse, `--attr` dupliqué, `--json` sur `positions`/`validate`, **API 422** (nom vide, `NaN` dans le corps ou les filtres) | 12 |
 | `irrigation/test_irrigation_cli_errors.py` | Lot CSV : colonne manquante, valeur invalide localisée (numéro de ligne) | 2 |
-| **Total** | | **165** |
+| `engine/test_observations.py` | Lecture des observations (nombre, intervalle, catégorie, degrés), **degré d'un intervalle = meilleure appartenance dans l'intervalle**, valeur précise = intervalle dégénéré, catégorie inconnue refusée, **chaînage flou** entre étapes | 26 |
+| `scouting/test_command.py` | Structure du système de commande (3 déductions + décision, 4 × 27 règles), **table de décision des 27 combinaisons** (fort-fort-fort seul au niveau 6), entrées mixtes, monotonie, classement par poste, jeu d'exemple, CSV d'observations, CLI `level`, routes `/commande` | 42 |
+| **Total** | | **233** |
 
 Exécution : `python -m pytest` (≈ 10 s). Couverture : **96 %** des lignes et branches de `src/`
 (`python -m pytest --cov=src --cov-report=term-missing`). Les lignes non couvertes sont des

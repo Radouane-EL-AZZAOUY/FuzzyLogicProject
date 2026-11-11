@@ -6,10 +6,10 @@ ever depends on these protocols (dependency-inversion principle).
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import Protocol
 
-from fuzzyengine import FuzzyPipeline
+from fuzzyengine import FuzzyPipeline, Observation
 from fuzzyscout.domain.player import Player
 from fuzzyscout.domain.position import Position
 
@@ -33,4 +33,10 @@ class PositionCatalog(Protocol):
 class PipelineProvider(Protocol):
     def pipeline_for(self, position: Position) -> FuzzyPipeline:
         """Build (or fetch from cache) the inference pipeline of ``position``."""
+        ...
+
+
+class ObservationRepository(Protocol):
+    def for_player(self, identifier: str) -> Mapping[str, Observation]:
+        """Observations recorded for a player (precise or not); empty when there are none."""
         ...

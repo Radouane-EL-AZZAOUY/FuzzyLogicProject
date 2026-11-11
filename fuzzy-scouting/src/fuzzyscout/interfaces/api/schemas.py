@@ -101,9 +101,23 @@ class FiredRuleOut(BaseModel):
     atomes: list[AtomOut]
 
 
+class ObservationOut(BaseModel):
+    """What was observed for one input: a value, an interval, a category or degrees."""
+
+    type: str
+    texte: str
+    valeur: float | None = None
+    min: float | None = None
+    max: float | None = None
+    terme: str | None = None
+    degres: dict[str, float] | None = None
+
+
 class StageOut(BaseModel):
     systeme: str
     entrees: dict[str, float]
+    observations: dict[str, ObservationOut] = {}
+    conclusions: dict[str, dict[str, float]] = {}
     entrees_floues: dict[str, dict[str, float]]
     regles_declenchees: list[FiredRuleOut]
     nb_regles_declenchees: int
@@ -190,6 +204,98 @@ class KnowledgeDetailOut(BaseModel):
     poste: PositionOut
     entrees_requises: list[str]
     etapes: list[KnowledgeStageDetailOut]
+
+
+ObservationIn = float | str | tuple[float, float] | dict[str, float]
+"""A number, a category or a textual interval (``"4.0..4.3"``), a ``[min, max]`` pair,
+or ``{"min": .., "max": ..}`` / explicit degrees ``{"fort": 0.7, "moyenne": 0.3}``."""
+
+
+class CommandEvaluationRequest(BaseModel):
+    model_config = ConfigDict(
+        allow_inf_nan=False,
+        str_strip_whitespace=True,
+        json_schema_extra={
+            "example": {
+                "name": "Joueur observé",
+                "observations": {
+                    "vitesse_max_kmh": 34.6,
+                    "temps_30m_s": "4.0..4.3",
+                    "sprints_p90": "eleve",
+                    "vitesse_changement_ms2": [4.5, 5.5],
+                    "distance_deplacement_m": 10.8,
+                    "temps_reaction_s": "court",
+                    "tacles_p90": 2.9,
+                    "tacles_reussis_pct": {"min": 68, "max": 76},
+                    "fautes_p90": 1.1,
+                },
+            }
+        },
+    )
+
+    observations: dict[str, ObservationIn] = Field(
+        ..., description="Une observation par mesure : valeur précise, intervalle ou catégorie."
+    )
+    name: str = Field("Joueur observé", min_length=1)
+    trace: bool = True
+
+
+class CommandRankingRequest(BaseModel):
+    model_config = STRICT_INPUT
+
+    position: str | None = Field(
+        None, description="Code du poste : seuls ses joueurs sont comparés (vide = tous)."
+    )
+    limit: int | None = Field(None, ge=1)
+
+
+class DeducedVariableOut(BaseModel):
+    valeur: float
+    label: str
+    degres: dict[str, float]
+
+
+class CommandPlayerOut(BaseModel):
+    id: str
+    nom: str
+    club: str
+    nationalite: str
+    poste: str
+
+
+class CommandEvaluationOut(BaseModel):
+    joueur: CommandPlayerOut
+    niveau: int
+    niveau_valeur: float
+    variables: dict[str, DeducedVariableOut]
+    degres_niveau: dict[str, float]
+    observations: dict[str, ObservationOut]
+    avertissements: list[str]
+    etapes: list[StageOut] | None = None
+
+
+class CommandRankingEntryOut(CommandEvaluationOut):
+    rang: int
+
+
+class CommandRankingOut(BaseModel):
+    poste: PositionOut | None
+    candidats: int
+    classes: int
+    classement: list[CommandRankingEntryOut]
+    exclus: list[SkippedOut]
+
+
+class CommandOut(BaseModel):
+    code: str
+    libelle: str
+    chainage: str
+    niveaux: int
+    sortie: str
+    variables_deduites: list[str]
+    entrees_requises: list[str]
+    etapes: list[KnowledgeStageDetailOut]
+    variables: list[VariableOut]
 
 
 class ErrorOut(BaseModel):

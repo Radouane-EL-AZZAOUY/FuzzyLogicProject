@@ -14,7 +14,7 @@ résolution, Prolog — vers la **logique floue**, selon deux angles complément
 | **Moteur** | `fuzzyengine` — inférence floue générique, règles en TOML / langage quasi naturel | `fuzzyprolog` — interpréteur Prolog flou en Python pur, REPL et preuves |
 | **Application** | `fuzzyscout` — classement de joueurs de football par poste, avec explication de chaque verdict (interface web + CLI + API HTTP) | `identitylink` — détection de doublons de personnes (*Mohamed / Mohammed / Muhammad*, villes alias, dates approximatives) |
 | **2ᵉ démonstration** | `fuzzyirrigation` — contrôleur d'irrigation | Exemples du cours rejoués (famille, humeur, coupe-choix, listes) |
-| **Tests** | 165 tests, couverture 96 % | 90 tests, couverture 93 % |
+| **Tests** | 233 tests, couverture 96 % | 90 tests, couverture 93 % |
 
 Les deux projets sont **indépendants** : chacun a son propre `pyproject.toml`, son environnement
 virtuel, sa documentation, ses tests et son Dockerfile. Leurs cœurs n'ont aucune dépendance

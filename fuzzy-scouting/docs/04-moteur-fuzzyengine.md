@@ -15,6 +15,7 @@ publique listée dans `__all__`).
 | `modifiers` | Modificateurs linguistiques `very`, `somewhat`, `extremely` et alias français |
 | `formulas` | AST `Atom`, `Not`, `And`, `Or` ; `Interpretation` ; `conjunction()` |
 | `rules` | `Consequent`, `Rule`, `RuleBase.validate()` |
+| `observations` | `Interval`, `Category`, `Degrees`, `parse_observation` : entrées précises ou floues |
 | `fuzzification` | `Fuzzifier` → `FuzzificationResult` |
 | `inference` | `InferenceMethod`, `MamdaniInference`, `RuleActivation`, `OutputDistribution` |
 | `defuzzification` | `Defuzzifier`, `Centroid`, `Bisector`, `MeanOfMaximum`, `DEFUZZIFIERS` |
@@ -178,6 +179,19 @@ contexte et deviennent disponibles comme entrées des suivantes. Propriétés :
 
 `PipelineResult` conserve le résultat de chaque étape (`stage(name)`), toutes les sorties, leurs
 libellés et les avertissements cumulés.
+
+### Entrées floues et chaînage flou
+
+`FuzzySystem.evaluate` et `FuzzyPipeline.evaluate` acceptent, pour chaque entrée, un nombre, un
+`Interval(a, b)` (degré d'un terme = meilleure appartenance dans l'intervalle), une
+`Category("terme")` (ce terme vaut 1) ou des `Degrees({...})` explicites.
+`EvaluationResult.observations` rapporte ce qui a été utilisé ; `EvaluationResult.conclusions`
+donne, pour chaque sortie, le degré auquel les règles ont conclu chaque terme.
+
+Un pipeline créé avec `chaining="fuzzy"` (paramètre de `FuzzyPipeline` et de `load_pipeline`)
+transmet ces conclusions à l'étape suivante sous forme de `Degrees`, au lieu du nombre
+défuzzifié (`chaining="crisp"`, valeur par défaut). Application :
+[système de commande Scout](10-commande-scout.md).
 
 ## 4.8 Explications
 

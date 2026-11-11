@@ -13,6 +13,7 @@ from collections.abc import Iterable
 
 from fuzzyengine.dsl.syntax import FRENCH, Syntax
 from fuzzyengine.inference import RuleActivation
+from fuzzyengine.observations import Degrees
 from fuzzyengine.pipeline import PipelineResult
 from fuzzyengine.system import EvaluationResult
 
@@ -26,11 +27,16 @@ def indent(lines: Iterable[str], prefix: str = "  ") -> list[str]:
 
 
 def explain_inputs(result: EvaluationResult) -> list[str]:
-    """One line per input: crisp value and its degrees in every term."""
-    return [
-        f"{name} = {value:.4g} -> {format_degrees(result.fuzzified_inputs[name])}"
-        for name, value in result.inputs.items()
-    ]
+    """One line per input: what was observed and its degrees in every term."""
+    lines = []
+    for name, degrees in result.fuzzified_inputs.items():
+        observed = result.observations.get(name, result.inputs.get(name))
+        if isinstance(observed, Degrees):
+            lines.append(f"{name} : {format_degrees(degrees)} (conclusion de l'étape précédente)")
+            continue
+        shown = f"{observed:.4g}" if isinstance(observed, float) else str(observed)
+        lines.append(f"{name} = {shown} -> {format_degrees(degrees)}")
+    return lines
 
 
 def explain_activations(

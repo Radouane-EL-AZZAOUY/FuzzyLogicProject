@@ -83,6 +83,18 @@ class OutputDistribution:
     def is_empty(self) -> bool:
         return all(c.strength <= 0.0 for c in self.contributions)
 
+    def term_strengths(self) -> dict[str, float]:
+        """Degree to which the rules concluded each term (aggregated firing strengths).
+
+        This is the fuzzy conclusion *before* defuzzification, in linguistic form:
+        ``{faible: 0.0, moyenne: 0.3, fort: 0.7}``.
+        """
+        strengths = dict.fromkeys(self.variable.labels, 0.0)
+        for contribution in self.contributions:
+            term = contribution.consequent.term
+            strengths[term] = self.aggregation(strengths[term], contribution.strength)
+        return strengths
+
 
 @dataclass(frozen=True, slots=True)
 class InferenceOutcome:

@@ -7,6 +7,15 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le ve
 
 ### Ajouté
 
+- Système de commande Scout : la vitesse, l'accélération et le tacle sont déduits chacun de trois
+  mesures, puis déterminent un niveau de 1 à 6 (108 règles, `knowledge/commande/`). Disponible
+  pour un joueur ou pour les joueurs d'un même poste : onglet « Commande Scout », commande
+  `fuzzyscout level`, routes `/commande…`. Voir `docs/10-commande-scout.md`.
+- `fuzzyengine` : entrées floues (`Interval`, `Category`, `Degrees`, `parse_observation`) et
+  chaînage flou des pipelines (`chaining="fuzzy"`), qui transmet la conclusion d'une étape à la
+  suivante sans défuzzification.
+- Observations d'exemple `observations_commande.csv` (valeurs, intervalles, catégories) et script
+  `scripts/generate_command_observations.py`.
 - Interface web de scouting servie par `fuzzyscout serve` (`/`) : recherche et classement par
   poste avec contraintes, fiche joueur expliquée (courbes d'appartenance, règles déclenchées),
   comparaison, simulateur « et si… ? », consultation des règles, sélection exportable en CSV.

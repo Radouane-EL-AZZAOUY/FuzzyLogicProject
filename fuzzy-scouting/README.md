@@ -1,7 +1,7 @@
 # Fuzzy Scouting — aide à la décision pour le recrutement de joueurs par logique floue
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-165%20passed-brightgreen.svg)](docs/09-qualite-et-tests.md)
+[![Tests](https://img.shields.io/badge/tests-233%20passed-brightgreen.svg)](docs/09-qualite-et-tests.md)
 [![Coverage](https://img.shields.io/badge/coverage-96%25-brightgreen.svg)](docs/09-qualite-et-tests.md)
 [![Typed](https://img.shields.io/badge/mypy-strict-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
@@ -69,10 +69,14 @@ fuzzyscout evaluate --position gardien --attr arrets_pct=76 --attr buts_encaisse
   --attr precision_passes_pct=80 --attr taille_cm=191 --attr sorties_aeriennes_p90=1.6 \
   --attr age=27 --attr minutes_jouees=3000 --attr blessures_jours=4
 
-# 6. Interface web sur http://127.0.0.1:8000 (API documentée sur /docs)
+# 6. Système de commande Scout : niveau de 1 à 6 (observations précises ou floues)
+fuzzyscout level --position attaquant
+fuzzyscout level --player P036 --explain
+
+# 7. Interface web sur http://127.0.0.1:8000 (API documentée sur /docs)
 fuzzyscout serve
 
-# 7. Seconde application : contrôleur d'irrigation
+# 8. Seconde application : contrôleur d'irrigation
 fuzzyirrigation decide --humidite-sol 18 --temperature 34 --humidite-air 28 --explain
 ```
 
@@ -151,14 +155,15 @@ fuzzy-scouting/
 │   │   ├── rules.py         règles, base de règles           ├── explanation.py     traces
 │   │   ├── dsl/             langage de règles (FR/EN)        └── loaders/           TOML
 │   ├── fuzzyscout/          application de scouting (architecture hexagonale)
-│   │   ├── domain/          Player, Position, filtres, ports, evaluate_player
-│   │   ├── application/     EvaluatePlayer, RankPlayers, ScoutingService
-│   │   ├── infrastructure/  dépôt CSV, catalogue et pipelines TOML, adaptateurs mémoire
+│   │   ├── domain/          Player, Position, filtres, ports, evaluate_player, command
+│   │   ├── application/     EvaluatePlayer, RankPlayers, ScoutCommand, ScoutingService
+│   │   ├── infrastructure/  dépôts CSV, catalogue et pipelines TOML, adaptateurs mémoire
 │   │   ├── interfaces/      cli.py, api/ (FastAPI), web/ (interface web), presenters.py
-│   │   ├── knowledge/       variables.toml, positions.toml, technique/ physique/ profil/ aptitude/
-│   │   └── data/            joueurs_exemple.csv (synthétique)
+│   │   ├── knowledge/       variables.toml, positions.toml, technique/ physique/ profil/
+│   │   │                    aptitude/ commande/ (système de commande Scout)
+│   │   └── data/            joueurs_exemple.csv, observations_commande.csv (synthétiques)
 │   └── fuzzyirrigation/     seconde application : contrôleur d'irrigation
-├── tests/                   165 tests (moteur, scouting, irrigation) — couverture 96 %
+├── tests/                   233 tests (moteur, scouting, irrigation) — couverture 96 %
 ├── docs/                    documentation détaillée (voir ci-dessous) + ADR
 ├── scripts/                 génération du jeu de données, lanceur Windows (scout.ps1)
 ├── scout.cmd / scout.sh     lanceurs : installation, interface web, tests, porte qualité
@@ -179,6 +184,7 @@ fuzzy-scouting/
 | [07 — Guide du développeur](docs/07-guide-developpeur.md) | Installation, commandes, conventions, comment étendre (poste, variable, forme, défuzzifieur…) |
 | [08 — Déploiement et exploitation](docs/08-deploiement.md) | CLI, API HTTP, configuration, Docker, journalisation, performances |
 | [09 — Qualité et tests](docs/09-qualite-et-tests.md) | Stratégie de test, inventaire, propriétés vérifiées, analyse statique, CI |
+| [10 — Système de commande Scout](docs/10-commande-scout.md) | Vitesse, accélération et tacle déduits de mesures précises ou floues ; niveau de 1 à 6 ; un joueur ou les joueurs d'un poste |
 | [ADR](docs/adr/) | Décisions d'architecture : cœur sans dépendance, Mamdani, TOML/DSL, hexagonal, pipeline, filtres, 2ᵉ application |
 | [Glossaire](docs/glossaire.md) | Vocabulaire de la logique floue et du scouting |
 

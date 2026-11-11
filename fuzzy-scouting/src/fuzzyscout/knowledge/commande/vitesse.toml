@@ -1,0 +1,127 @@
+# Vitesse : déduite de la vitesse de pointe, du temps sur 30 m et du nombre de sprints.
+#
+# Barème : chaque mesure rapporte 2 points (favorable), 1 point (intermédiaire) ou
+# 0 point (défavorable). Les 27 combinaisons sont couvertes :
+#   total 4 à 6 -> fort   |   total 3 -> moyenne   |   total 0 à 2 -> faible
+
+[system]
+name = "commande_vitesse"
+description = "Vitesse du joueur déduite de trois mesures"
+
+[[inputs]]
+ref = "vitesse_max_kmh"
+[[inputs]]
+ref = "temps_30m_s"
+[[inputs]]
+ref = "sprints_p90"
+
+[[outputs]]
+ref = "vitesse"
+
+[[rules]]
+id = "V1"
+text = "SI vitesse_max_kmh EST rapide ET temps_30m_s EST court ET sprints_p90 EST eleve ALORS vitesse EST fort"
+
+[[rules]]
+id = "V2"
+text = "SI vitesse_max_kmh EST rapide ET temps_30m_s EST court ET sprints_p90 EST moyen ALORS vitesse EST fort"
+
+[[rules]]
+id = "V3"
+text = "SI vitesse_max_kmh EST rapide ET temps_30m_s EST court ET sprints_p90 EST faible ALORS vitesse EST fort"
+
+[[rules]]
+id = "V4"
+text = "SI vitesse_max_kmh EST rapide ET temps_30m_s EST moyen ET sprints_p90 EST eleve ALORS vitesse EST fort"
+
+[[rules]]
+id = "V5"
+text = "SI vitesse_max_kmh EST rapide ET temps_30m_s EST moyen ET sprints_p90 EST moyen ALORS vitesse EST fort"
+
+[[rules]]
+id = "V6"
+text = "SI vitesse_max_kmh EST rapide ET temps_30m_s EST moyen ET sprints_p90 EST faible ALORS vitesse EST moyenne"
+
+[[rules]]
+id = "V7"
+text = "SI vitesse_max_kmh EST rapide ET temps_30m_s EST long ET sprints_p90 EST eleve ALORS vitesse EST fort"
+
+[[rules]]
+id = "V8"
+text = "SI vitesse_max_kmh EST rapide ET temps_30m_s EST long ET sprints_p90 EST moyen ALORS vitesse EST moyenne"
+
+[[rules]]
+id = "V9"
+text = "SI vitesse_max_kmh EST rapide ET temps_30m_s EST long ET sprints_p90 EST faible ALORS vitesse EST faible"
+
+[[rules]]
+id = "V10"
+text = "SI vitesse_max_kmh EST moyenne ET temps_30m_s EST court ET sprints_p90 EST eleve ALORS vitesse EST fort"
+
+[[rules]]
+id = "V11"
+text = "SI vitesse_max_kmh EST moyenne ET temps_30m_s EST court ET sprints_p90 EST moyen ALORS vitesse EST fort"
+
+[[rules]]
+id = "V12"
+text = "SI vitesse_max_kmh EST moyenne ET temps_30m_s EST court ET sprints_p90 EST faible ALORS vitesse EST moyenne"
+
+[[rules]]
+id = "V13"
+text = "SI vitesse_max_kmh EST moyenne ET temps_30m_s EST moyen ET sprints_p90 EST eleve ALORS vitesse EST fort"
+
+[[rules]]
+id = "V14"
+text = "SI vitesse_max_kmh EST moyenne ET temps_30m_s EST moyen ET sprints_p90 EST moyen ALORS vitesse EST moyenne"
+
+[[rules]]
+id = "V15"
+text = "SI vitesse_max_kmh EST moyenne ET temps_30m_s EST moyen ET sprints_p90 EST faible ALORS vitesse EST faible"
+
+[[rules]]
+id = "V16"
+text = "SI vitesse_max_kmh EST moyenne ET temps_30m_s EST long ET sprints_p90 EST eleve ALORS vitesse EST moyenne"
+
+[[rules]]
+id = "V17"
+text = "SI vitesse_max_kmh EST moyenne ET temps_30m_s EST long ET sprints_p90 EST moyen ALORS vitesse EST faible"
+
+[[rules]]
+id = "V18"
+text = "SI vitesse_max_kmh EST moyenne ET temps_30m_s EST long ET sprints_p90 EST faible ALORS vitesse EST faible"
+
+[[rules]]
+id = "V19"
+text = "SI vitesse_max_kmh EST lente ET temps_30m_s EST court ET sprints_p90 EST eleve ALORS vitesse EST fort"
+
+[[rules]]
+id = "V20"
+text = "SI vitesse_max_kmh EST lente ET temps_30m_s EST court ET sprints_p90 EST moyen ALORS vitesse EST moyenne"
+
+[[rules]]
+id = "V21"
+text = "SI vitesse_max_kmh EST lente ET temps_30m_s EST court ET sprints_p90 EST faible ALORS vitesse EST faible"
+
+[[rules]]
+id = "V22"
+text = "SI vitesse_max_kmh EST lente ET temps_30m_s EST moyen ET sprints_p90 EST eleve ALORS vitesse EST moyenne"
+
+[[rules]]
+id = "V23"
+text = "SI vitesse_max_kmh EST lente ET temps_30m_s EST moyen ET sprints_p90 EST moyen ALORS vitesse EST faible"
+
+[[rules]]
+id = "V24"
+text = "SI vitesse_max_kmh EST lente ET temps_30m_s EST moyen ET sprints_p90 EST faible ALORS vitesse EST faible"
+
+[[rules]]
+id = "V25"
+text = "SI vitesse_max_kmh EST lente ET temps_30m_s EST long ET sprints_p90 EST eleve ALORS vitesse EST faible"
+
+[[rules]]
+id = "V26"
+text = "SI vitesse_max_kmh EST lente ET temps_30m_s EST long ET sprints_p90 EST moyen ALORS vitesse EST faible"
+
+[[rules]]
+id = "V27"
+text = "SI vitesse_max_kmh EST lente ET temps_30m_s EST long ET sprints_p90 EST faible ALORS vitesse EST faible"
