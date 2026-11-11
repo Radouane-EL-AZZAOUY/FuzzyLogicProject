@@ -157,6 +157,41 @@ class KnowledgeOut(BaseModel):
     etapes: list[KnowledgeStageOut]
 
 
+class TermOut(BaseModel):
+    label: str
+    forme: str
+    points: list[tuple[float, float]]
+
+
+class VariableOut(BaseModel):
+    nom: str
+    description: str
+    unite: str
+    univers: tuple[float, float]
+    termes: list[TermOut]
+
+
+class RuleOut(BaseModel):
+    id: str
+    regle: str
+    description: str
+    poids: float
+
+
+class KnowledgeStageDetailOut(BaseModel):
+    nom: str
+    description: str
+    entrees: list[str]
+    sorties: list[str]
+    regles: list[RuleOut]
+
+
+class KnowledgeDetailOut(BaseModel):
+    poste: PositionOut
+    entrees_requises: list[str]
+    etapes: list[KnowledgeStageDetailOut]
+
+
 class ErrorOut(BaseModel):
     detail: str
 

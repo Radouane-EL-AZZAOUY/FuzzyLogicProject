@@ -105,7 +105,7 @@ sequenceDiagram
         E->>E: renommage θ (Renamer)
         E->>Un: unify(but, tête θ, σ, similarité, t-norme)
         Un-->>E: Unifier(σ', degré) ou échec
-        E->>E: degré ← T(degré, degré(σ'), degré(clause)) ; λ-coupure
+        E->>E: degré ← T(degré, degré(σ'), degré(clause)), puis λ-coupure
         E->>E: empiler le corps (barrière de coupe, niveau+1) devant le reste
         E-->>U: Solution(bindings, degré, preuve) à chaque succès (générateur)
     end

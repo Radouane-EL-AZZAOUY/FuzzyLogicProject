@@ -94,7 +94,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     validate.add_argument("--json", action="store_true", help="sortie JSON")
 
-    serve = subparsers.add_parser("serve", help="démarrer l'API HTTP (nécessite l'extra [api])")
+    serve = subparsers.add_parser(
+        "serve", help="démarrer l'interface web et l'API HTTP (nécessite l'extra [api])"
+    )
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8000)
     serve.add_argument("--reload", action="store_true")

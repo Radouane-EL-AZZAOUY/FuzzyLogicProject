@@ -20,6 +20,9 @@ pip install -e ".[api,dev]"
 
 ## 7.2 Commandes courantes
 
+Sans `make` (Windows notamment), le lanceur `scout` couvre l'essentiel : `scout` (interface web),
+`scout setup`, `scout test`, `scout check`, `scout demo` — `./scout.sh …` sous Linux/macOS.
+
 | Tâche | `make` | Équivalent direct |
 |---|---|---|
 | Tests | `make test` | `python -m pytest` |

@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
+from fuzzyengine import FuzzyPipeline, LinguisticVariable
 from fuzzyscout.application.evaluate_player import EvaluatePlayer
 from fuzzyscout.application.rank_players import RankingRequest, RankPlayers
 from fuzzyscout.domain.evaluation import PlayerEvaluation, RankingReport
@@ -70,6 +71,20 @@ class ScoutingService:
 
     def rank(self, request: RankingRequest) -> RankingReport:
         return self._rank.execute(request)
+
+    def pipeline(self, position_code: str) -> tuple[Position, FuzzyPipeline]:
+        """The position and its loaded inference pipeline (rules, variables)."""
+        position = self._positions.get(position_code)
+        return position, self._pipelines.pipeline_for(position)
+
+    def variables(self) -> list[LinguisticVariable]:
+        """Every linguistic variable used by at least one position, in first-use order."""
+        seen: dict[str, LinguisticVariable] = {}
+        for position in self._positions.all():
+            for stage in self._pipelines.pipeline_for(position).stages:
+                for name, variable in {**stage.inputs, **stage.outputs}.items():
+                    seen.setdefault(name, variable)
+        return list(seen.values())
 
     def validate_knowledge(self) -> list[KnowledgeSummary]:
         """Load every position's pipeline; raises on the first invalid knowledge base."""

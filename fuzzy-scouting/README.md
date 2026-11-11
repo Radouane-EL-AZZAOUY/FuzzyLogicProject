@@ -1,7 +1,7 @@
 # Fuzzy Scouting — aide à la décision pour le recrutement de joueurs par logique floue
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-162%20passed-brightgreen.svg)](docs/09-qualite-et-tests.md)
+[![Tests](https://img.shields.io/badge/tests-165%20passed-brightgreen.svg)](docs/09-qualite-et-tests.md)
 [![Coverage](https://img.shields.io/badge/coverage-96%25-brightgreen.svg)](docs/09-qualite-et-tests.md)
 [![Typed](https://img.shields.io/badge/mypy-strict-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
@@ -10,7 +10,7 @@ Projet d'**intelligence artificielle symbolique** (ILISI 3, FSTM) : un système 
 évalue et classe des joueurs de football pour un poste donné, à partir de leurs statistiques et de
 règles rédigées en langage quasi naturel, **en expliquant chaque verdict**. Il se compose d'un
 moteur d'inférence floue générique (`fuzzyengine`), de l'application de scouting (`fuzzyscout`,
-CLI + API HTTP) et d'une seconde application démontrant la généricité du moteur sur un problème
+interface web + CLI + API HTTP) et d'une seconde application démontrant la généricité du moteur sur un problème
 d'économie d'eau (`fuzzyirrigation`).
 
 Le projet prolonge le cours *Programmation logique* (logique des propositions, systèmes formels,
@@ -29,6 +29,24 @@ prédicats gradués, des règles `SI … ALORS …`, et une conclusion accompagn
 qui l'ont produite. Détails : [docs/01-probleme-et-objectifs.md](docs/01-probleme-et-objectifs.md).
 
 ## Démarrage rapide
+
+Le plus simple — un lanceur installe le projet au premier appel (environnement virtuel compris),
+démarre le serveur et ouvre l'interface web dans le navigateur :
+
+```bash
+scout                  # Windows (invite de commandes ou double-clic sur scout.cmd) ; PowerShell : .\scout
+./scout.sh             # Linux / macOS
+```
+
+| Commande | Effet |
+|---|---|
+| `scout` ou `scout web` | Interface web sur <http://127.0.0.1:8000> (`-Port 8080` pour changer de port, `-NoBrowser` pour ne pas ouvrir le navigateur ; sous Linux/macOS : `PORT=8080`, `NO_BROWSER=1`) |
+| `scout setup` | Crée `.venv` et installe le projet avec ses dépendances |
+| `scout test` | Lance les tests |
+| `scout check` | Porte qualité : format, lint, typage strict, tests |
+| `scout demo` | Classement de démonstration dans le terminal |
+
+Ou pas à pas :
 
 ```bash
 # 1. Environnement (Python >= 3.11)
@@ -51,7 +69,7 @@ fuzzyscout evaluate --position gardien --attr arrets_pct=76 --attr buts_encaisse
   --attr precision_passes_pct=80 --attr taille_cm=191 --attr sorties_aeriennes_p90=1.6 \
   --attr age=27 --attr minutes_jouees=3000 --attr blessures_jours=4
 
-# 6. API HTTP (documentation interactive sur http://127.0.0.1:8000/docs)
+# 6. Interface web sur http://127.0.0.1:8000 (API documentée sur /docs)
 fuzzyscout serve
 
 # 7. Seconde application : contrôleur d'irrigation
@@ -91,15 +109,30 @@ Pourquoi :
   ...
 ```
 
+## Interface web
+
+`fuzzyscout serve` démarre l'API **et** une interface web pour l'entraîneur ou la cellule de
+recrutement, sur <http://127.0.0.1:8000>. Elle est écrite en HTML/CSS/JavaScript sans dépendance ni
+étape de build, et ne contient aucune logique floue : tout est calculé par l'API.
+
+| Écran | Usage |
+|---|---|
+| **Recherche** | Choisir un poste, poser les contraintes (budget, âge, temps de jeu, nationalité, poste naturel) ; classement trié par aptitude, liste des exclus avec la raison |
+| **Fiche joueur** | Aptitude et notes technique / physique / profil, puis *pourquoi* : courbes d'appartenance avec la valeur du joueur, degrés obtenus, règles déclenchées et leur force |
+| **Comparer** | Jusqu'à trois joueurs côte à côte au même poste (notes et statistiques utilisées par les règles) |
+| **Simulateur** | Curseurs « et si… ? » : évaluer un candidat hors référentiel ou modifier les statistiques d'un joueur, verdict recalculé en direct |
+| **Règles** | Base de connaissances d'un poste en clair (étapes, règles, poids) et vocabulaire flou (courbes de chaque terme) |
+| **Sélection** | Liste de joueurs retenus (conservée dans le navigateur), export CSV |
+
 ## Comment ça marche (en une figure)
 
 ```mermaid
 flowchart LR
-    CSV[(statistiques<br/>du joueur)] --> F[Fuzzification<br/>μ_rapide(34.6) = 0.4]
-    F --> I[Inférence<br/>modus ponens généralisé<br/>SI … ALORS …]
-    KB[/bases de règles TOML<br/>technique · physique · profil · aptitude/] --> I
-    I --> D[Défuzzification<br/>centroïde]
-    D --> R[aptitude = 81.8<br/>« excellente »<br/>+ règles activées]
+    CSV[("statistiques<br/>du joueur")] --> F["Fuzzification<br/>μ_rapide(34.6) = 0.4"]
+    F --> I["Inférence<br/>modus ponens généralisé<br/>SI … ALORS …"]
+    KB[/"bases de règles TOML<br/>technique · physique · profil · aptitude"/] --> I
+    I --> D["Défuzzification<br/>centroïde"]
+    D --> R["aptitude = 81.8<br/>« excellente »<br/>+ règles activées"]
 ```
 
 Chaque poste est évalué par un **pipeline** de quatre petits systèmes flous (technique spécifique
@@ -121,13 +154,14 @@ fuzzy-scouting/
 │   │   ├── domain/          Player, Position, filtres, ports, evaluate_player
 │   │   ├── application/     EvaluatePlayer, RankPlayers, ScoutingService
 │   │   ├── infrastructure/  dépôt CSV, catalogue et pipelines TOML, adaptateurs mémoire
-│   │   ├── interfaces/      cli.py, api/ (FastAPI), presenters.py
+│   │   ├── interfaces/      cli.py, api/ (FastAPI), web/ (interface web), presenters.py
 │   │   ├── knowledge/       variables.toml, positions.toml, technique/ physique/ profil/ aptitude/
 │   │   └── data/            joueurs_exemple.csv (synthétique)
 │   └── fuzzyirrigation/     seconde application : contrôleur d'irrigation
-├── tests/                   162 tests (moteur, scouting, irrigation) — couverture 96 %
+├── tests/                   165 tests (moteur, scouting, irrigation) — couverture 96 %
 ├── docs/                    documentation détaillée (voir ci-dessous) + ADR
-├── scripts/                 génération du jeu de données
+├── scripts/                 génération du jeu de données, lanceur Windows (scout.ps1)
+├── scout.cmd / scout.sh     lanceurs : installation, interface web, tests, porte qualité
 ├── docker/                  Dockerfile, docker-compose.yml
 └── pyproject.toml           paquet, extras, ruff, mypy strict, pytest
 ```

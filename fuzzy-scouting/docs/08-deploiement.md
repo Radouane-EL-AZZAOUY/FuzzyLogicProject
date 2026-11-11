@@ -12,7 +12,7 @@ fuzzyscout [--players CSV] [--knowledge-dir DIR] [--log-level LEVEL] <commande> 
 | `rank` | `--position CODE` (requis), `--top N`, `--max-age`, `--max-value` (M€), `--min-minutes`, `--nationality`, `--natural-only`, `--explain`, `--json` | Classe les joueurs du CSV pour un poste |
 | `evaluate` | `--position CODE`, `--player ID` **ou** `--attr nom=valeur` (répétable) + `--name`, `--explain`, `--json` | Évalue un joueur du CSV ou un candidat ad hoc |
 | `validate` | — | Charge et valide toutes les bases de connaissances |
-| `serve` | `--host`, `--port`, `--reload` | Démarre l'API HTTP (extra `[api]`) |
+| `serve` | `--host`, `--port`, `--reload` | Démarre l'interface web et l'API HTTP (extra `[api]`) |
 
 Codes de retour : `0` succès ; `1` erreur métier ou de connaissances (message sur stderr) ; `2`
 erreur d'usage (argparse). La sortie est forcée en UTF-8 (sûr sous Windows).
@@ -27,6 +27,8 @@ fuzzyirrigation batch mesures.csv [--json]
 Démarrage : `fuzzyscout serve` ou
 `uvicorn fuzzyscout.interfaces.api.app:create_app --factory --host 0.0.0.0 --port 8000`.
 Documentation interactive : `/docs` (Swagger UI), `/redoc`, schéma `/openapi.json`.
+La racine `/` sert l'interface web (fichiers statiques de `fuzzyscout/interfaces/web/`, exposés
+sous `/ui/`) ; elle n'utilise que les routes ci-dessous.
 
 | Méthode | Route | Corps | Réponse |
 |---|---|---|---|
@@ -34,6 +36,8 @@ Documentation interactive : `/docs` (Swagger UI), `/redoc`, schéma `/openapi.js
 | GET | `/positions` | — | liste des postes |
 | GET | `/players`, `/players/{id}` | — | joueurs du référentiel (404 si inconnu) |
 | GET | `/knowledge` | — | résumé validé des bases (étapes, règles, entrées requises) |
+| GET | `/knowledge/{poste}` | — | règles complètes d'un poste, étape par étape (texte, description, poids ; 404 si inconnu) |
+| GET | `/variables` | — | variables linguistiques : univers, unité, termes et courbe d'appartenance échantillonnée |
 | POST | `/evaluations` | `{position, player_id, trace?}` | évaluation (404 joueur/poste inconnu, 422 statistiques manquantes) |
 | POST | `/evaluations/ad-hoc` | `{position, attributes{…}, name?, trace?}` | évaluation d'un candidat transitoire |
 | POST | `/rankings` | `{position, limit?, max_age?, max_market_value?, min_minutes?, natural_position_only?, nationality?, trace?}` | classement + exclus |

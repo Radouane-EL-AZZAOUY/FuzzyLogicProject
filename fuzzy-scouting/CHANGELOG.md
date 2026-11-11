@@ -3,6 +3,18 @@
 Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le versionnement
 [SemVer](https://semver.org/lang/fr/).
 
+## [Non publié]
+
+### Ajouté
+
+- Interface web de scouting servie par `fuzzyscout serve` (`/`) : recherche et classement par
+  poste avec contraintes, fiche joueur expliquée (courbes d'appartenance, règles déclenchées),
+  comparaison, simulateur « et si… ? », consultation des règles, sélection exportable en CSV.
+- Lanceurs `scout.cmd` / `scout.sh` : installation, interface web (ouverture du navigateur),
+  tests, porte qualité et démonstration en une commande.
+- API : `GET /variables` (variables linguistiques et courbes échantillonnées) et
+  `GET /knowledge/{poste}` (règles détaillées d'un poste).
+
 ## [0.1.0] — 2026-10-13
 
 ### Ajouté

@@ -14,10 +14,12 @@ Design notes:
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from fuzzyengine import FuzzyEngineError
 from fuzzyscout import __version__
@@ -35,6 +37,9 @@ from fuzzyscout.domain.errors import (
 from fuzzyscout.domain.filters import RankingFilters
 from fuzzyscout.interfaces import presenters
 from fuzzyscout.interfaces.api import schemas
+
+WEB_DIR = Path(__file__).resolve().parent.parent / "web"
+"""Static single-page web interface (served at ``/``, assets under ``/ui``)."""
 
 
 def get_service(request: Request) -> ScoutingService:
@@ -118,6 +123,30 @@ def create_app(
             schemas.as_model(schemas.KnowledgeOut, item)
             for item in presenters.knowledge_to_dict(svc.validate_knowledge())
         ]
+
+    @app.get(
+        "/knowledge/{position}",
+        response_model=schemas.KnowledgeDetailOut,
+        responses={404: {"model": schemas.ErrorOut}},
+        tags=["système"],
+    )
+    def knowledge_detail(position: str, svc: Service) -> schemas.KnowledgeDetailOut:
+        return schemas.as_model(
+            schemas.KnowledgeDetailOut, presenters.pipeline_to_dict(*svc.pipeline(position))
+        )
+
+    @app.get("/variables", response_model=list[schemas.VariableOut], tags=["référentiel"])
+    def variables(svc: Service) -> list[schemas.VariableOut]:
+        return [
+            schemas.as_model(schemas.VariableOut, presenters.variable_to_dict(v))
+            for v in svc.variables()
+        ]
+
+    @app.get("/", include_in_schema=False)
+    def web_index() -> FileResponse:
+        return FileResponse(WEB_DIR / "index.html")
+
+    app.mount("/ui", StaticFiles(directory=WEB_DIR), name="ui")
 
     @app.post(
         "/evaluations",

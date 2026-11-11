@@ -4,11 +4,11 @@
 
 ```mermaid
 flowchart TB
-    U[Tests unitaires du moteur<br/>chaque module, chaque cas limite] --> P[Tests de propriétés logiques<br/>tables de vérité, De Morgan, tiers exclu, précédence]
-    P --> K[Tests des bases de connaissances<br/>chargement, couverture de l'espace d'entrée, monotonie]
-    K --> A[Tests applicatifs<br/>cas d'utilisation avec dépôts en mémoire]
-    A --> I[Tests d'interface<br/>CLI (sorties, codes retour) et API (TestClient)]
-    I --> E[Test bout en bout<br/>classements sur le jeu de données d'exemple]
+    U["Tests unitaires du moteur<br/>chaque module, chaque cas limite"] --> P["Tests de propriétés logiques<br/>tables de vérité, De Morgan, tiers exclu, précédence"]
+    P --> K["Tests des bases de connaissances<br/>chargement, couverture de l'espace d'entrée, monotonie"]
+    K --> A["Tests applicatifs<br/>cas d'utilisation avec dépôts en mémoire"]
+    A --> I["Tests d'interface<br/>CLI (sorties, codes retour) et API (TestClient)"]
+    I --> E["Test bout en bout<br/>classements sur le jeu de données d'exemple"]
 ```
 
 Les tests sont écrits **contre les abstractions** (un nouveau `Defuzzifier` ou une nouvelle
@@ -32,12 +32,12 @@ temporaires passent par `tmp_path`.
 | `scouting/test_knowledge.py` | Catalogue, chargement de chaque pipeline, **couverture de l'espace d'entrée (300 tirages × 5 postes)**, monotonie du score en fonction des buts | 4 |
 | `scouting/test_use_cases.py` | Évaluation expliquée, candidat faible vs fort, erreurs, ad hoc, **classement/filtres/exclusions**, résumé des bases, **cohérence sur le jeu d'exemple** | 7 |
 | `scouting/test_cli.py` | Chaque commande en texte et JSON, codes de retour 1 et 2 | 6 |
-| `scouting/test_api.py` | Santé, référentiel, évaluations (200/404/422), ad hoc, classement, validation pydantic | 3 |
+| `scouting/test_api.py` | Santé, référentiel, évaluations (200/404/422), ad hoc, classement, validation pydantic, **variables et courbes d'appartenance**, règles détaillées d'un poste, service de l'interface web | 6 |
 | `irrigation/test_irrigation.py` | Décisions extrêmes, monotonie, validation des mesures, CLI unitaire/JSON/lot/erreur | 5 |
 | `engine/test_robustness.py` | Singleton hors grille **signalé** (pas de valeur par défaut silencieuse), entrées non finies / non numériques, paramètres de forme non numériques, **pipeline mal ordonné refusé** | 11 |
 | `scouting/test_robustness.py` | Cellules CSV `nan`/`inf` rejetées avec ligne et colonne, **repli Windows-1252**, répertoire au lieu de fichier, invariants `Player`, filtre de poste insensible à la casse, `--attr` dupliqué, `--json` sur `positions`/`validate`, **API 422** (nom vide, `NaN` dans le corps ou les filtres) | 12 |
 | `irrigation/test_irrigation_cli_errors.py` | Lot CSV : colonne manquante, valeur invalide localisée (numéro de ligne) | 2 |
-| **Total** | | **162** |
+| **Total** | | **165** |
 
 Exécution : `python -m pytest` (≈ 10 s). Couverture : **96 %** des lignes et branches de `src/`
 (`python -m pytest --cov=src --cov-report=term-missing`). Les lignes non couvertes sont des

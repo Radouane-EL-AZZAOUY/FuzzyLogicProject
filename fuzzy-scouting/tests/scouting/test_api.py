@@ -63,3 +63,35 @@ def test_ranking_endpoint(client: TestClient) -> None:
     assert body["classes"] == 1 and body["classement"][0]["rang"] == 1
     assert {s["id"] for s in body["exclus"]} == {"S2", "S3"}
     assert client.post("/rankings", json={"position": "attaquant", "limit": 0}).status_code == 422
+
+
+def test_variables_endpoint_exposes_sampled_membership_curves(client: TestClient) -> None:
+    variables = {v["nom"]: v for v in client.get("/variables").json()}
+    assert {"buts_p90", "age", "aptitude"} <= set(variables)
+    age = variables["age"]
+    assert age["univers"] == [16, 40] and age["unite"] == "ans"
+    prime = next(t for t in age["termes"] if t["label"] == "prime")
+    assert prime["forme"].startswith("triangle")
+    # The breakpoints of the shape are sampled exactly: the peak is not clipped.
+    assert [28, 1.0] in prime["points"]
+    assert all(0.0 <= mu <= 1.0 for _, mu in prime["points"])
+    xs = [x for x, _ in prime["points"]]
+    assert xs == sorted(xs) and xs[0] == 16 and xs[-1] == 40
+
+
+def test_knowledge_detail_lists_readable_rules(client: TestClient) -> None:
+    body = client.get("/knowledge/attaquant").json()
+    assert body["poste"]["code"] == "attaquant"
+    assert "buts_p90" in body["entrees_requises"]
+    assert [s["sorties"] for s in body["etapes"]][-1] == ["aptitude"]
+    first = body["etapes"][0]["regles"][0]
+    assert first["id"] == "T1" and first["regle"].startswith("SI ") and 0 < first["poids"] <= 1
+    assert client.get("/knowledge/libero").status_code == 404
+
+
+def test_web_interface_is_served(client: TestClient) -> None:
+    index = client.get("/")
+    assert index.status_code == 200 and "text/html" in index.headers["content-type"]
+    assert "/ui/app.js" in index.text
+    for asset in ("/ui/app.js", "/ui/app.css"):
+        assert client.get(asset).status_code == 200

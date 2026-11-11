@@ -40,7 +40,7 @@ fuzzyirrigation = "fuzzyirrigation.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-fuzzyscout = ["knowledge/*.toml", "knowledge/*/*.toml", "data/*.csv", "py.typed"]
+fuzzyscout = ["knowledge/*.toml", "knowledge/*/*.toml", "data/*.csv", "interfaces/web/*", "py.typed"]
 fuzzyirrigation = ["knowledge/*.toml", "py.typed"]
 fuzzyengine = ["py.typed"]
 

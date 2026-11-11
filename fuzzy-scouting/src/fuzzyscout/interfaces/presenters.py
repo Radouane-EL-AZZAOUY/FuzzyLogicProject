@@ -9,7 +9,15 @@ from __future__ import annotations
 from collections.abc import Iterable, Sequence
 from typing import Any
 
-from fuzzyengine import FRENCH, EvaluationResult, RuleActivation, Syntax
+from fuzzyengine import (
+    FRENCH,
+    EvaluationResult,
+    FuzzyPipeline,
+    LinguisticVariable,
+    Rule,
+    RuleActivation,
+    Syntax,
+)
 from fuzzyengine.explanation import (
     explain_activations,
     explain_conclusions,
@@ -134,6 +142,62 @@ def knowledge_to_dict(summaries: Iterable[KnowledgeSummary]) -> list[dict[str, A
         }
         for s in summaries
     ]
+
+
+def variable_to_dict(variable: LinguisticVariable, resolution: int = 81) -> dict[str, Any]:
+    """A linguistic variable with each term's membership curve sampled for plotting.
+
+    The curve is sampled server-side (regular grid + the shape's own parameters, which
+    are the breakpoints of piecewise-linear shapes) so that clients never have to
+    re-implement membership functions.
+    """
+    universe = variable.universe
+    grid = universe.grid(resolution)
+    terms = []
+    for term in variable.terms:
+        breakpoints = [p for p in term.membership.parameters() if universe.contains(p)]
+        xs = sorted({round(x, 6) for x in (*grid, *breakpoints)})
+        terms.append(
+            {
+                "label": term.label,
+                "forme": str(term.membership),
+                "points": [[x, round(term.degree(x), 4)] for x in xs],
+            }
+        )
+    return {
+        "nom": variable.name,
+        "description": variable.description,
+        "unite": variable.unit,
+        "univers": [universe.lower, universe.upper],
+        "termes": terms,
+    }
+
+
+def rule_to_dict(rule: Rule, syntax: Syntax = FRENCH) -> dict[str, Any]:
+    return {
+        "id": rule.identifier,
+        "regle": rule.render(syntax),
+        "description": rule.description,
+        "poids": rule.weight,
+    }
+
+
+def pipeline_to_dict(position: Position, pipeline: FuzzyPipeline) -> dict[str, Any]:
+    """The full knowledge of one position: every stage with its readable rules."""
+    return {
+        "poste": position_to_dict(position),
+        "entrees_requises": list(pipeline.required_inputs),
+        "etapes": [
+            {
+                "nom": stage.name,
+                "description": stage.description,
+                "entrees": list(stage.input_names),
+                "sorties": list(stage.output_names),
+                "regles": [rule_to_dict(rule) for rule in stage.rule_base],
+            }
+            for stage in pipeline.stages
+        ],
+    }
 
 
 # --- text ---------------------------------------------------------------------
